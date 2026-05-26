@@ -17,40 +17,21 @@ limitations under the License.
 package lifecycle
 
 import (
-	"fmt"
-
-	corev1 "k8s.io/api/core/v1"
-
 	v1 "sigs.k8s.io/karpenter/pkg/apis/v1"
 	"sigs.k8s.io/karpenter/pkg/events"
 )
 
 func InsufficientCapacityErrorEvent(nodeClaim *v1.NodeClaim, err error) events.Event {
-	return events.Event{
-		InvolvedObject: nodeClaim,
-		Type:           corev1.EventTypeWarning,
-		Reason:         events.InsufficientCapacityError,
-		Message:        fmt.Sprintf("NodeClaim %s event: %s", nodeClaim.Name, truncateMessage(err.Error())),
-		DedupeValues:   []string{string(nodeClaim.UID)},
-	}
+	_ = "STUB: not implemented"
+	return *new(events.Event)
 }
 
 func NodeClassNotReadyEvent(nodeClaim *v1.NodeClaim, err error) events.Event {
-	return events.Event{
-		InvolvedObject: nodeClaim,
-		Type:           corev1.EventTypeWarning,
-		Reason:         events.NodeClassNotReady,
-		Message:        fmt.Sprintf("NodeClaim %s event: %s", nodeClaim.Name, truncateMessage(err.Error())),
-		DedupeValues:   []string{string(nodeClaim.UID)},
-	}
+	_ = "STUB: not implemented"
+	return *new(events.Event)
 }
 
 func UnregisteredTaintMissingEvent(nodeClaim *v1.NodeClaim) events.Event {
-	return events.Event{
-		InvolvedObject: nodeClaim,
-		Type:           corev1.EventTypeWarning,
-		Reason:         events.UnregisteredTaintMissing,
-		Message:        fmt.Sprintf("Missing %s taint which prevents registration related race conditions on Karpenter-managed nodes", v1.UnregisteredTaintKey),
-		DedupeValues:   []string{string(nodeClaim.UID)},
-	}
+	_ = "STUB: not implemented"
+	return *new(events.Event)
 }

@@ -19,7 +19,6 @@ package nodeoverlay
 import (
 	"sync/atomic"
 
-	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
 
@@ -46,46 +45,21 @@ type InstanceTypeStore struct {
 	store atomic.Pointer[internalInstanceTypeStore]
 }
 
-func NewInstanceTypeStore() *InstanceTypeStore {
-	publicStore := &InstanceTypeStore{
-		store: atomic.Pointer[internalInstanceTypeStore]{},
-	}
-	publicStore.store.Store(newInternalInstanceTypeStore())
-	return publicStore
-}
+func NewInstanceTypeStore() *InstanceTypeStore { _ = "STUB: not implemented"; return nil }
 
 func (s *InstanceTypeStore) UpdateStore(updatedStore *internalInstanceTypeStore) {
-	s.store.Swap(updatedStore)
+	_ = "STUB: not implemented"
+	return
 }
 
 func (s *InstanceTypeStore) ApplyAll(nodePoolName string, its []*cloudprovider.InstanceType) ([]*cloudprovider.InstanceType, error) {
-	internalStore := lo.FromPtr(s.store.Load())
-
-	if !internalStore.evaluatedNodePools.Has(nodePoolName) {
-		return []*cloudprovider.InstanceType{}, cloudprovider.NewUnevaluatedNodePoolError(nodePoolName)
-	}
-
-	result := make([]*cloudprovider.InstanceType, 0, len(its))
-
-	_, ok := internalStore.updates[nodePoolName]
-	if !ok {
-		return its, nil
-	}
-
-	for _, it := range its {
-		result = append(result, internalStore.apply(nodePoolName, it))
-	}
-	return result, nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 func (s *InstanceTypeStore) Apply(nodePoolName string, it *cloudprovider.InstanceType) (*cloudprovider.InstanceType, error) {
-	internalStore := lo.FromPtr(s.store.Load())
-
-	if !internalStore.evaluatedNodePools.Has(nodePoolName) {
-		return &cloudprovider.InstanceType{}, cloudprovider.NewUnevaluatedNodePoolError(nodePoolName)
-	}
-
-	return internalStore.apply(nodePoolName, it), nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 // InstanceTypeStore manages instance type updates for node pools.
@@ -103,10 +77,8 @@ type internalInstanceTypeStore struct {
 }
 
 func newInternalInstanceTypeStore() *internalInstanceTypeStore {
-	return &internalInstanceTypeStore{
-		updates:            map[string]map[string]*instanceTypeUpdate{},
-		evaluatedNodePools: sets.Set[string]{},
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // Apply takes a node pool name and instance type, and returns a modified copy of the instance type
@@ -115,176 +87,64 @@ func newInternalInstanceTypeStore() *internalInstanceTypeStore {
 // - Selective copy: Offerings (only copied if price overlay applied)
 // - Selective copy: Capacity (only copied if capacity overlay applied)
 func (s *internalInstanceTypeStore) apply(nodePoolName string, it *cloudprovider.InstanceType) *cloudprovider.InstanceType {
-	instanceTypeList, ok := s.updates[nodePoolName]
-	if !ok {
-		return it
-	}
-	instanceTypeUpdate, ok := instanceTypeList[it.Name]
-	if !ok {
-		return it
-	}
-
-	// Create a shallow copy of the instance type, sharing immutable fields
-	overriddenInstanceType := &cloudprovider.InstanceType{
-		Name:         it.Name,
-		Requirements: it.Requirements, // Shared - never modified
-		Overhead:     it.Overhead,     // Shared - never modified
-		Capacity:     it.Capacity,
-	}
-
-	// Handle capacity overlay - only deep copy if we're modifying it
-	if len(instanceTypeUpdate.Capacity.OverlayUpdate) != 0 {
-		// ApplyCapacityOverlay replaces Capacity with a new merged map (original untouched)
-		overriddenInstanceType.ApplyCapacityOverlay(instanceTypeUpdate.Capacity.OverlayUpdate)
-	}
-
-	// Handle offerings - copy-on-write only for offerings that need price overlay
-	if len(instanceTypeUpdate.Price) != 0 {
-		overriddenInstanceType.Offerings = s.applyPriceOverlays(it.Offerings, instanceTypeUpdate.Price)
-	} else {
-		overriddenInstanceType.Offerings = it.Offerings // Shared - not modified
-	}
-
-	return overriddenInstanceType
+	_ = "STUB: not implemented"
+	return nil
 }
+
+// Create a shallow copy of the instance type, sharing immutable fields
+
+// Shared - never modified
+// Shared - never modified
+
+// Handle capacity overlay - only deep copy if we're modifying it
+
+// ApplyCapacityOverlay replaces Capacity with a new merged map (original untouched)
+
+// Handle offerings - copy-on-write only for offerings that need price overlay
+
+// Shared - not modified
 
 // applyPriceOverlays creates a new offerings slice with selective copying:
 // - Offerings that need price overlay are copied and mutated
 // - Offerings without overlay share the original pointer
 // This minimizes allocations while ensuring each node pool has independent pricing.
 func (s *internalInstanceTypeStore) applyPriceOverlays(offerings cloudprovider.Offerings, priceUpdates map[string]*priceUpdate) cloudprovider.Offerings {
-	result := make(cloudprovider.Offerings, len(offerings))
-	for i, offering := range offerings {
-		if overlay, ok := priceUpdates[offering.Requirements.String()]; ok {
-			// This offering needs modification - create a copy
-			copiedOffering := &cloudprovider.Offering{
-				Requirements:        offering.Requirements, // Shared - requirements are immutable
-				Price:               offering.Price,
-				Available:           offering.Available,
-				ReservationCapacity: offering.ReservationCapacity,
-			}
-			copiedOffering.ApplyPriceOverlay(lo.FromPtr(overlay.OverlayUpdate))
-			result[i] = copiedOffering
-		} else {
-			// Not modified - share the pointer
-			result[i] = offering
-		}
-	}
-	return result
+	_ = "STUB: not implemented"
+	return *new(cloudprovider.Offerings)
 }
+
+// This offering needs modification - create a copy
+
+// Shared - requirements are immutable
+
+// Not modified - share the pointer
 
 // updateInstanceTypeCapacity add a new Capacity overlay update to the associated instance type.
 // NOTE: This method does not perform conflict validation. The callee must check for conflicts first.
 func (i *internalInstanceTypeStore) updateInstanceTypeCapacity(nodePoolName string, instanceTypeName string, nodeOverlay v1alpha1.NodeOverlay) {
-	if nodeOverlay.Spec.Capacity == nil {
-		return
-	}
-
-	_, ok := i.updates[nodePoolName]
-	if !ok {
-		i.updates[nodePoolName] = map[string]*instanceTypeUpdate{}
-	}
-	_, ok = i.updates[nodePoolName][instanceTypeName]
-	if !ok {
-		i.updates[nodePoolName][instanceTypeName] = &instanceTypeUpdate{Price: map[string]*priceUpdate{}, Capacity: &capacityUpdate{OverlayUpdate: corev1.ResourceList{}}}
-	}
-
-	if i.updates[nodePoolName][instanceTypeName].Capacity == nil {
-		i.updates[nodePoolName][instanceTypeName].Capacity = &capacityUpdate{
-			OverlayUpdate:                 nodeOverlay.Spec.Capacity,
-			lowestWeightCapacityResources: nodeOverlay.Spec.Capacity,
-			lowestWeight:                  nodeOverlay.Spec.Weight,
-		}
-	} else {
-		for resource, quantity := range nodeOverlay.Spec.Capacity {
-			if _, foundCapacityUpdate := i.updates[nodePoolName][instanceTypeName].Capacity.OverlayUpdate[resource]; foundCapacityUpdate {
-				continue
-			}
-
-			i.updates[nodePoolName][instanceTypeName].Capacity.OverlayUpdate[resource] = quantity
-		}
-
-		i.updates[nodePoolName][instanceTypeName].Capacity.lowestWeightCapacityResources = nodeOverlay.Spec.Capacity
-		i.updates[nodePoolName][instanceTypeName].Capacity.lowestWeight = nodeOverlay.Spec.Weight
-	}
+	_ = "STUB: not implemented"
+	return
 }
 
 func (i *internalInstanceTypeStore) isCapacityUpdateConflicting(nodePoolName string, instanceTypeName string, nodeOverlay v1alpha1.NodeOverlay) bool {
-	_, ok := i.updates[nodePoolName]
-	if !ok {
-		return false
-	}
-	instanceTypeUpdate, ok := i.updates[nodePoolName][instanceTypeName]
-	if !ok {
-		return false
-	}
-	if instanceTypeUpdate.Capacity == nil {
-		return false
-	}
-	// IMPORTANT: This logic assumes NodeOverlays are processed in descending order by weight.
-	if lo.FromPtr(instanceTypeUpdate.Capacity.lowestWeight) != lo.FromPtr(nodeOverlay.Spec.Weight) {
-		return false
-	}
-
-	for resource := range nodeOverlay.Spec.Capacity {
-		if _, found := instanceTypeUpdate.Capacity.lowestWeightCapacityResources[resource]; found {
-			return true
-		}
-	}
-
+	_ = "STUB: not implemented"
 	return false
 }
+
+// IMPORTANT: This logic assumes NodeOverlays are processed in descending order by weight.
 
 // updateInstanceTypeOffering add a new Price overlay update to the associated instance type.
 // NOTE: This method does not perform conflict validation. The callee must check for conflicts first.
 func (i *internalInstanceTypeStore) updateInstanceTypeOffering(nodePoolName string, instanceTypeName string, nodeOverlay v1alpha1.NodeOverlay, offerings cloudprovider.Offerings) {
-	price := lo.Ternary(nodeOverlay.Spec.Price == nil, nodeOverlay.Spec.PriceAdjustment, nodeOverlay.Spec.Price)
-	if price == nil {
-		return
-	}
-
-	_, ok := i.updates[nodePoolName]
-	if !ok {
-		i.updates[nodePoolName] = map[string]*instanceTypeUpdate{}
-	}
-	_, ok = i.updates[nodePoolName][instanceTypeName]
-	if !ok {
-		i.updates[nodePoolName][instanceTypeName] = &instanceTypeUpdate{Price: map[string]*priceUpdate{}, Capacity: &capacityUpdate{OverlayUpdate: corev1.ResourceList{}}}
-	}
-
-	for _, of := range offerings {
-		if update, foundOfferingUpdate := i.updates[nodePoolName][instanceTypeName].Price[of.Requirements.String()]; foundOfferingUpdate {
-			update.lowestWeight = nodeOverlay.Spec.Weight
-			continue
-		}
-		i.updates[nodePoolName][instanceTypeName].Price[of.Requirements.String()] = &priceUpdate{
-			OverlayUpdate: price,
-			lowestWeight:  nodeOverlay.Spec.Weight,
-		}
-	}
+	_ = "STUB: not implemented"
+	return
 }
 
 func (i *internalInstanceTypeStore) isOfferingUpdateConflicting(nodePoolName string, instanceTypeName string, of *cloudprovider.Offering, nodeOverlay v1alpha1.NodeOverlay) bool {
-	_, ok := i.updates[nodePoolName]
-	if !ok {
-		return false
-	}
-	_, ok = i.updates[nodePoolName][instanceTypeName]
-	if !ok {
-		return false
-	}
-	updatedOffering, ok := i.updates[nodePoolName][instanceTypeName].Price[of.Requirements.String()]
-	if !ok {
-		return false
-	}
-	// IMPORTANT: This logic assumes NodeOverlays are processed in descending order by weight.
-	if lo.FromPtr(nodeOverlay.Spec.Weight) != lo.FromPtr(updatedOffering.lowestWeight) {
-		return false
-	}
-
-	return true
+	_ = "STUB: not implemented"
+	return false
 }
 
-func (s *InstanceTypeStore) Reset() {
-	s.store.Swap(NewInstanceTypeStore().store.Load())
-}
+// IMPORTANT: This logic assumes NodeOverlays are processed in descending order by weight.
+
+func (s *InstanceTypeStore) Reset() { _ = "STUB: not implemented"; return }

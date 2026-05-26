@@ -17,14 +17,10 @@ limitations under the License.
 package test
 
 import (
-	"fmt"
 	"math/rand"
-	"strings"
 	"sync"
 	"time"
 
-	"github.com/Pallinder/go-randomdata"
-	"github.com/imdario/mergo"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "sigs.k8s.io/karpenter/pkg/apis/v1"
@@ -38,48 +34,29 @@ var (
 	sequentialNumberLock = new(sync.Mutex)
 )
 
-func RandomName() string {
-	sequentialNumberLock.Lock()
-	defer sequentialNumberLock.Unlock()
-	sequentialNumber++
-	return strings.ToLower(fmt.Sprintf("%s-%d-%s", randomdata.SillyName(), sequentialNumber, randomdata.Alphanumeric(10)))
-}
+func RandomName() string { _ = "STUB: not implemented"; return "" }
 
 func NamespacedObjectMeta(overrides ...metav1.ObjectMeta) metav1.ObjectMeta {
-	return MustMerge(ObjectMeta(metav1.ObjectMeta{
-		Namespace: "default",
-	}), overrides...)
+	_ = "STUB: not implemented"
+	return *new(metav1.ObjectMeta)
 }
 
 func ObjectMeta(overrides ...metav1.ObjectMeta) metav1.ObjectMeta {
-	om := MustMerge(metav1.ObjectMeta{
-		Name:   RandomName(),
-		Labels: map[string]string{DiscoveryLabel: "unspecified"}, // For cleanup discovery
-	}, overrides...)
-	om.CreationTimestamp = metav1.Now()
-	om.Generation = 1
-	return om
+	_ = "STUB: not implemented"
+	return *new(metav1.ObjectMeta)
 }
+
+// For cleanup discovery
 
 func TemplateObjectMeta(overrides ...v1.ObjectMeta) v1.ObjectMeta {
-	return MustMerge(v1.ObjectMeta{
-		Labels: map[string]string{DiscoveryLabel: "unspecified"}, // For cleanup discovery
-	}, overrides...)
+	_ = "STUB: not implemented"
+	return *new(v1.ObjectMeta)
 }
 
-func MustMerge[T any](dest T, srcs ...T) T {
-	for _, src := range srcs {
-		if err := mergo.Merge(&dest, src, mergo.WithOverride); err != nil {
-			panic(fmt.Sprintf("Failed to merge object: %s", err))
-		}
-	}
-	return dest
-}
+// For cleanup discovery
 
-func RandomProviderID() string {
-	return ProviderID(randomdata.Alphanumeric(17))
-}
+func MustMerge[T any](dest T, srcs ...T) T { _ = "STUB: not implemented"; return *new(T) }
 
-func ProviderID(base string) string {
-	return fmt.Sprintf("fake:///%s", base)
-}
+func RandomProviderID() string { _ = "STUB: not implemented"; return "" }
+
+func ProviderID(base string) string { _ = "STUB: not implemented"; return "" }

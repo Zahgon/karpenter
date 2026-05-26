@@ -17,86 +17,30 @@ limitations under the License.
 package pretty
 
 import (
-	"bytes"
 	"cmp"
-	"encoding/json"
-	"fmt"
 	"regexp"
-	"slices"
-	"strings"
-	"unicode"
 
 	v1 "k8s.io/api/core/v1"
 )
 
-func Concise(o any) string {
-	bytes, err := json.Marshal(o)
-	if err != nil {
-		return err.Error()
-	}
-	return string(bytes)
-}
+func Concise(o any) string { _ = "STUB: not implemented"; return "" }
 
 // Slice truncates a slice after a certain number of max items to ensure
 // that the Slice isn't too long
-func Slice[T any](s []T, maxItems int) string {
-	var sb strings.Builder
-	for i, elem := range s {
-		if i > maxItems-1 {
-			fmt.Fprintf(&sb, " and %d other(s)", len(s)-i)
-			break
-		} else if i > 0 {
-			fmt.Fprint(&sb, ", ")
-		}
-		fmt.Fprint(&sb, elem)
-	}
-	return sb.String()
-}
+func Slice[T any](s []T, maxItems int) string { _ = "STUB: not implemented"; return "" }
 
 // Map truncates a map after a certain number of max items to ensure that the
 // description in a log doesn't get too long
 func Map[K cmp.Ordered, V any](values map[K]V, maxItems int) string {
-	var buf bytes.Buffer
-	count := 0
-	var keys []K
-	for k := range values {
-		keys = append(keys, k)
-	}
-	slices.Sort(keys)
-	for _, k := range keys {
-		v := values[k]
-		count++
-		if buf.Len() > 0 {
-			fmt.Fprintf(&buf, ", ")
-		}
-		fmt.Fprintf(&buf, "%v: %v", k, v)
-		if count >= maxItems {
-			break
-		}
-
-	}
-	if count < len(values) {
-		fmt.Fprintf(&buf, " and %d other(s)", len(values)-count)
-	}
-	return buf.String()
+	_ = "STUB: not implemented"
+	return ""
 }
 
-func Taint(t v1.Taint) string {
-	if t.Value == "" {
-		return fmt.Sprintf("%s:%s", t.Key, t.Effect)
-	}
-	return fmt.Sprintf("%s=%s:%s", t.Key, t.Value, t.Effect)
-}
+func Taint(t v1.Taint) string { _ = "STUB: not implemented"; return "" }
 
 var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
 var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
 
-func ToSnakeCase(str string) string {
-	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
-	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
-	return strings.ToLower(snake)
-}
+func ToSnakeCase(str string) string { _ = "STUB: not implemented"; return "" }
 
-func Sentence(str string) string {
-	return string(unicode.ToUpper(rune(str[0]))) + str[1:]
-}
+func Sentence(str string) string { _ = "STUB: not implemented"; return "" }

@@ -18,18 +18,13 @@ package cost
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	opmetrics "github.com/awslabs/operatorpkg/metrics"
-	"github.com/awslabs/operatorpkg/serrors"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 	crmetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	v1 "sigs.k8s.io/karpenter/pkg/apis/v1"
@@ -105,12 +100,8 @@ type NodeClaimMetaData struct {
 // compute costs across the cluster. It requires a cloud provider for accessing
 // instance type and pricing information, and a Kubernetes client for NodePool loofferingKeyups.
 func NewClusterCost(ctx context.Context, cloudProvider cloudprovider.CloudProvider, client client.Client) *ClusterCost {
-	return &ClusterCost{
-		npCostMap:     make(map[string]*NodePoolCost),
-		nodeClaimMap:  make(map[types.NamespacedName]NodeClaimMetaData),
-		cloudProvider: cloudProvider,
-		client:        client,
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // UpdateOfferings updates the available instance types and their pricing information
@@ -120,262 +111,95 @@ func NewClusterCost(ctx context.Context, cloudProvider cloudprovider.CloudProvid
 // Returns an error if instance type information cannot be updated or if cost
 // recalculation fails.
 func (cc *ClusterCost) UpdateOfferings(ctx context.Context, np *v1.NodePool, instanceTypes []*cloudprovider.InstanceType) {
-	cc.Lock()
-	defer cc.Unlock()
-	cc.internalUpdateOfferings(np, instanceTypes)
+	_ = "STUB: not implemented"
+	return
 }
 
 func (cc *ClusterCost) internalNodepoolUpdate(ctx context.Context, np *v1.NodePool) error {
-	instanceTypes, err := cc.cloudProvider.GetInstanceTypes(ctx, np)
-	if err != nil {
-		return fmt.Errorf("failed to get instance types for nodepool %q, %w", np.Name, err)
-	}
-	cc.internalUpdateOfferings(np, instanceTypes)
+	_ = "STUB: not implemented"
 	return nil
 }
 
 func (cc *ClusterCost) internalUpdateOfferings(np *v1.NodePool, instanceTypes []*cloudprovider.InstanceType) {
-	npCost, exists := cc.npCostMap[np.Name]
-
-	if !exists {
-		cc.createNewNodePoolCost(np.Name, instanceTypes)
-	} else {
-		instanceTypes = lo.Filter(instanceTypes, func(it *cloudprovider.InstanceType, _ int) bool {
-			return it != nil
-		})
-		newMap := map[OfferingKey]OfferingCount{}
-		for _, it := range instanceTypes {
-			for _, o := range it.Offerings {
-				offeringKey := OfferingKey{InstanceName: it.Name, Zone: o.Zone(), CapacityType: o.CapacityType()}
-				oldCount, exists := npCost.offeringCounts[offeringKey]
-				newMap[offeringKey] = OfferingCount{
-					Count: lo.Ternary(exists, oldCount.Count, 0),
-					Price: o.Price,
-				}
-			}
-		}
-		// Add back all of the offering counts that don't exist in the new instance types
-		// This can't occur on container restart, so we may lose cost data from offerings that are no longer returned
-		// from the cloud provider but still have nodeclaims.
-		for key, count := range npCost.offeringCounts {
-			_, exists := newMap[key]
-			if !exists {
-				newMap[key] = count
-			}
-		}
-
-		npCost.offeringCounts = newMap
-		// re-calculate the cost as the instances have changed
-		cost := npCost.updateCost()
-		cc.npCostMap[np.Name].cost = cost
-	}
+	_ = "STUB: not implemented"
+	return
 }
 
-func (npc *NodePoolCost) updateCost() float64 {
-	cost := 0.0
-	for _, oc := range npc.offeringCounts {
-		// add the new price times the count of that offering
-		cost = cost + (float64(oc.Count) * oc.Price)
-	}
-	return cost
-}
+// Add back all of the offering counts that don't exist in the new instance types
+// This can't occur on container restart, so we may lose cost data from offerings that are no longer returned
+// from the cloud provider but still have nodeclaims.
+
+// re-calculate the cost as the instances have changed
+
+func (npc *NodePoolCost) updateCost() float64 { _ = "STUB: not implemented"; return 0 }
+
+// add the new price times the count of that offering
 
 func (cc *ClusterCost) createNewNodePoolCost(npName string, instanceTypes []*cloudprovider.InstanceType) {
+	_ = "STUB: not implemented"
 	// create the new npc
-	cc.npCostMap[npName] = &NodePoolCost{
-		offeringCounts: make(map[OfferingKey]OfferingCount),
-		cost:           0.0,
-	}
-	for _, it := range instanceTypes {
-		for _, o := range it.Offerings {
-			cc.npCostMap[npName].offeringCounts[OfferingKey{InstanceName: it.Name, Zone: o.Zone(), CapacityType: o.CapacityType()}] = OfferingCount{
-				Count: 0,
-				Price: o.Price,
-			}
-		}
-	}
+	return
 }
 
 // UpdateNodeClaim adds a NodeClaim to cost tracking. The NodeClaim must have
 // all required labels or it will be ignored and logged as an error.
 func (cc *ClusterCost) UpdateNodeClaim(ctx context.Context, nodeClaim *v1.NodeClaim) error {
-	cc.Lock()
-	defer cc.Unlock()
-	if _, exists := cc.nodeClaimMap[client.ObjectKeyFromObject(nodeClaim)]; exists {
-		return nil
-	}
-
-	failed := false
-	defer func() {
-		if failed {
-			CostTrackingErrorsTotal.Inc(map[string]string{
-				metrics.NodePoolLabel: nodeClaim.Labels[v1.NodePoolLabelKey],
-			})
-		}
-	}()
-
-	// First lets check if the right labels are there
-	if nodeClaimMissingLabels(*nodeClaim) {
-		// not technically a failure mode as we expect to retry once the
-		// labels are propagated
-		return nil
-	}
-
-	nodePoolName := nodeClaim.Labels[v1.NodePoolLabelKey]
-	offeringKey := OfferingKey{CapacityType: nodeClaim.Labels[v1.CapacityTypeLabelKey], Zone: nodeClaim.Labels[corev1.LabelTopologyZone], InstanceName: nodeClaim.Labels[corev1.LabelInstanceTypeStable]}
-
-	err := cc.internalAddOffering(ctx, nodePoolName, offeringKey)
-	if err != nil {
-		failed = true
-		return serrors.Wrap(err, "nodeclaim", klog.KObj(nodeClaim), "nodepool", nodePoolName)
-	}
-	cc.nodeClaimMap[client.ObjectKeyFromObject(nodeClaim)] = NodeClaimMetaData{
-		NodePoolName: nodePoolName,
-		NodeClaimKey: offeringKey,
-	}
+	_ = "STUB: not implemented"
 	return nil
 }
+
+// First lets check if the right labels are there
+
+// not technically a failure mode as we expect to retry once the
+// labels are propagated
 
 // DeleteNodeClaim removes a NodeClaim from cost tracking. If the NodeClaim
 // was not being tracked, this operation is a no-op.
 func (cc *ClusterCost) DeleteNodeClaim(ctx context.Context, nn types.NamespacedName) error {
-	cc.Lock()
-	defer cc.Unlock()
-	metadata, exists := cc.nodeClaimMap[nn]
-
-	if !exists {
-		return nil
-	}
-
-	failed := false
-	defer func() {
-		if failed {
-			CostTrackingErrorsTotal.Inc(map[string]string{
-				metrics.NodePoolLabel: metadata.NodePoolName,
-			})
-		}
-	}()
-
-	err := cc.internalRemoveOffering(metadata.NodePoolName, metadata.NodeClaimKey)
-	if err != nil {
-		failed = true
-		return serrors.Wrap(err, "namespacedName", nn, "nodepool", metadata.NodePoolName)
-	}
-
-	// If it succeeds, we can remove the metadata
-	delete(cc.nodeClaimMap, nn)
+	_ = "STUB: not implemented"
 	return nil
 }
 
-func (cc *ClusterCost) DeleteNodePool(ctx context.Context, npName string) {
-	cc.Lock()
-	defer cc.Unlock()
+// If it succeeds, we can remove the metadata
 
-	cc.nodeClaimMap = lo.PickBy(cc.nodeClaimMap, func(_ types.NamespacedName, metadata NodeClaimMetaData) bool {
-		return metadata.NodePoolName != npName
-	})
-	delete(cc.npCostMap, npName)
+func (cc *ClusterCost) DeleteNodePool(ctx context.Context, npName string) {
+	_ = "STUB: not implemented"
+	return
 }
 
 // internalAddOffering updates the internal clusterCost state to include a new offering for a given nodepool.
 // It is used to increment the overall cost when a node joins the cluster. It is only called by UpdateNodeClaim
 // after that function has determined if a nodeclaim is new.
 func (cc *ClusterCost) internalAddOffering(ctx context.Context, npName string, offeringKey OfferingKey) error {
-	np := &v1.NodePool{}
-	if err := cc.client.Get(ctx, client.ObjectKey{Name: npName}, np, &client.GetOptions{}); err != nil {
-		return err
-	}
-
-	_, exists := cc.npCostMap[npName]
-	if !exists {
-		// create the new npc
-		instanceTypes, err := cc.cloudProvider.GetInstanceTypes(ctx, np)
-		if err != nil {
-			return fmt.Errorf("failed to get instance types for new nodepool %q while adding offering for instance %q, %w", np.Name, offeringKey.InstanceName, err)
-		}
-		cc.createNewNodePoolCost(npName, instanceTypes)
-	}
-
-	oc, exists := cc.npCostMap[npName].offeringCounts[offeringKey]
-	if !exists {
-		// our offerings must be out of date, we should update and retry
-		err := cc.internalNodepoolUpdate(ctx, np)
-		if err != nil {
-			return fmt.Errorf("failed to update nodepool %q during retry while searching for offering for instance %q in zone %q with capacity %q, %w", np.Name, offeringKey.InstanceName, offeringKey.Zone, offeringKey.CapacityType, err)
-		}
-		oc, exists = cc.npCostMap[npName].offeringCounts[offeringKey]
-		if !exists {
-			// Start at 0; the unconditional oc.Count += 1 below accounts for this add.
-			oc = OfferingCount{Count: 0, Price: 0.0}
-			log.FromContext(ctx).Error(fmt.Errorf("failed to find offering %q during retry while searching for instance %q in zone %q with capacity %q in nodepool %q", offeringKey, offeringKey.InstanceName, offeringKey.Zone, offeringKey.CapacityType, npName), "offering price unknown after retry — cost tracking will undercount for this nodeclaim until next UpdateOfferings")
-		}
-	}
-	oc.Count += 1
-	cc.npCostMap[npName].offeringCounts[offeringKey] = oc
-	cc.npCostMap[npName].cost += oc.Price
+	_ = "STUB: not implemented"
 	return nil
 }
+
+// create the new npc
+
+// our offerings must be out of date, we should update and retry
+
+// Start at 0; the unconditional oc.Count += 1 below accounts for this add.
 
 // internalRemoveOffering updates the internal clusterCost state to remove an existing offering for a given nodepool.
 // It is used to decrement the overall cost when a node leeaves the cluster. It is only called by DeleteNodeClaim
 // after that function has determined if a nodeclaim is already being accounted for.
 func (cc *ClusterCost) internalRemoveOffering(npName string, offeringKey OfferingKey) error {
-	npc, exists := cc.npCostMap[npName]
-	if !exists {
-		return fmt.Errorf("attempted to remove offering from nonexistent nodepool %q (instance, %q, zone, %q, capacity, %q)", npName, offeringKey.InstanceName, offeringKey.Zone, offeringKey.CapacityType)
-	}
-
-	oc, exists := npc.offeringCounts[offeringKey]
-	if !exists {
-		return fmt.Errorf("attempted to remove nonexistent offering from nodepool %q (instance, %q, zone, %q, capacity, %q)", npName, offeringKey.InstanceName, offeringKey.Zone, offeringKey.CapacityType)
-	}
-
-	oc.Count -= 1
-	npc.offeringCounts[offeringKey] = oc
-	npc.cost -= oc.Price
-	if oc.Count == 0 {
-		delete(npc.offeringCounts, offeringKey)
-	}
-	if len(lo.Values(npc.offeringCounts)) == 0 {
-		delete(cc.npCostMap, npName)
-	}
+	_ = "STUB: not implemented"
 	return nil
 }
 
-func (cc *ClusterCost) Reset() {
-	cc.Lock()
-	defer cc.Unlock()
-	cc.npCostMap = make(map[string]*NodePoolCost)
-	cc.nodeClaimMap = make(map[types.NamespacedName]NodeClaimMetaData)
-}
+func (cc *ClusterCost) Reset() { _ = "STUB: not implemented"; return }
 
 // GetClusterCost returns the total cost of all compute resources across
 // all NodePools in the cluster.
-func (cc *ClusterCost) GetClusterCost() float64 {
-	cc.RLock()
-	defer cc.RUnlock()
-	return lo.SumBy(lo.Values(cc.npCostMap), func(npc *NodePoolCost) float64 { return npc.cost })
-}
+func (cc *ClusterCost) GetClusterCost() float64 { _ = "STUB: not implemented"; return 0 }
 
 // GetNodepoolCost returns the total cost of compute resources for a specific
 // NodePool. Returns 0 if the NodePool is not being tracked.
 func (cc *ClusterCost) GetNodepoolCost(np *v1.NodePool) float64 {
-	cc.RLock()
-	defer cc.RUnlock()
-	npc, exists := cc.npCostMap[np.Name]
-	if !exists {
-		return 0
-	}
-	return npc.cost
+	_ = "STUB: not implemented"
+	return 0
 }
 
-func nodeClaimMissingLabels(nc v1.NodeClaim) bool {
-	var missingLabels []string
-	for _, key := range NecessaryLabels {
-		_, exists := nc.Labels[key]
-		if !exists {
-			missingLabels = append(missingLabels, key)
-		}
-	}
-	return len(missingLabels) > 0
-}
+func nodeClaimMissingLabels(nc v1.NodeClaim) bool { _ = "STUB: not implemented"; return false }

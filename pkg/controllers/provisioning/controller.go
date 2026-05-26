@@ -18,21 +18,13 @@ package provisioning
 
 import (
 	"context"
-	"time"
 
-	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
-	controllerruntime "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	v1 "sigs.k8s.io/karpenter/pkg/apis/v1"
 	"sigs.k8s.io/karpenter/pkg/controllers/state"
-	"sigs.k8s.io/karpenter/pkg/operator/injection"
-	utilscontroller "sigs.k8s.io/karpenter/pkg/utils/controller"
-	"sigs.k8s.io/karpenter/pkg/utils/pod"
 )
 
 const (
@@ -49,40 +41,30 @@ type PodController struct {
 
 // NewPodController constructs a controller instance
 func NewPodController(kubeClient client.Client, provisioner *Provisioner, cluster *state.Cluster) *PodController {
-	return &PodController{
-		kubeClient:  kubeClient,
-		provisioner: provisioner,
-		cluster:     cluster,
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // Reconcile the resource
-func (c *PodController) Name() string {
-	return "provisioner.trigger.pod"
-}
+func (c *PodController) Name() string { _ = "STUB: not implemented"; return "" }
 
 func (c *PodController) Reconcile(ctx context.Context, p *corev1.Pod) (reconcile.Result, error) {
-	ctx = injection.WithControllerName(ctx, c.Name()) //nolint:ineffassign,staticcheck
-
-	if !pod.IsProvisionable(p) {
-		return reconcile.Result{}, nil
-	}
-	c.provisioner.Trigger(p.UID)
-	// ACK the pending pod when first observed so that total time spent pending due to Karpenter is tracked.
-	c.cluster.AckPods(p)
-	// Continue to requeue until the pod is no longer provisionable. Pods may
-	// not be scheduled as expected if new pods are created while nodes are
-	// coming online. Even if a provisioning loop is successful, the pod may
-	// require another provisioning loop to become schedulable.
-	return reconcile.Result{RequeueAfter: 10 * time.Second}, nil
+	_ = "STUB: not implemented"
+	return *new(reconcile.Result), nil
 }
 
+//nolint:ineffassign,staticcheck
+
+// ACK the pending pod when first observed so that total time spent pending due to Karpenter is tracked.
+
+// Continue to requeue until the pod is no longer provisionable. Pods may
+// not be scheduled as expected if new pods are created while nodes are
+// coming online. Even if a provisioning loop is successful, the pod may
+// require another provisioning loop to become schedulable.
+
 func (c *PodController) Register(ctx context.Context, m manager.Manager) error {
-	return controllerruntime.NewControllerManagedBy(m).
-		Named(c.Name()).
-		For(&corev1.Pod{}).
-		WithOptions(controller.Options{MaxConcurrentReconciles: utilscontroller.LinearScaleReconciles(utilscontroller.CPUCount(ctx), minReconciles, maxReconciles)}).
-		Complete(reconcile.AsReconciler(m.GetClient(), c))
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // NodeController for the resource
@@ -93,41 +75,31 @@ type NodeController struct {
 
 // NewNodeController constructs a controller instance
 func NewNodeController(kubeClient client.Client, provisioner *Provisioner) *NodeController {
-	return &NodeController{
-		kubeClient:  kubeClient,
-		provisioner: provisioner,
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // Reconcile the resource
-func (c *NodeController) Name() string {
-	return "provisioner.trigger.node"
-}
+func (c *NodeController) Name() string { _ = "STUB: not implemented"; return "" }
 
 func (c *NodeController) Reconcile(ctx context.Context, n *corev1.Node) (reconcile.Result, error) {
+	_ = "STUB: not implemented"
 	//nolint:ineffassign
-	ctx = injection.WithControllerName(ctx, c.Name()) //nolint:ineffassign,staticcheck
-
-	// If the disruption taint doesn't exist and the deletion timestamp isn't set, it's not being disrupted.
-	// We don't check the deletion timestamp here, as we expect the termination controller to eventually set
-	// the taint when it picks up the node from being deleted.
-	if !lo.ContainsBy(n.Spec.Taints, func(taint corev1.Taint) bool {
-		return taint.MatchTaint(&v1.DisruptedNoScheduleTaint)
-	}) {
-		return reconcile.Result{}, nil
-	}
-	c.provisioner.Trigger(n.UID)
-	// Continue to requeue until the node is no longer provisionable. Pods may
-	// not be scheduled as expected if new pods are created while nodes are
-	// coming online. Even if a provisioning loop is successful, the pod may
-	// require another provisioning loop to become schedulable.
-	return reconcile.Result{RequeueAfter: 10 * time.Second}, nil
+	return *new(reconcile.Result), nil
 }
 
+//nolint:ineffassign,staticcheck
+
+// If the disruption taint doesn't exist and the deletion timestamp isn't set, it's not being disrupted.
+// We don't check the deletion timestamp here, as we expect the termination controller to eventually set
+// the taint when it picks up the node from being deleted.
+
+// Continue to requeue until the node is no longer provisionable. Pods may
+// not be scheduled as expected if new pods are created while nodes are
+// coming online. Even if a provisioning loop is successful, the pod may
+// require another provisioning loop to become schedulable.
+
 func (c *NodeController) Register(ctx context.Context, m manager.Manager) error {
-	return controllerruntime.NewControllerManagedBy(m).
-		Named(c.Name()).
-		For(&corev1.Node{}).
-		WithOptions(controller.Options{MaxConcurrentReconciles: utilscontroller.LinearScaleReconciles(utilscontroller.CPUCount(ctx), minReconciles, maxReconciles)}).
-		Complete(reconcile.AsReconciler(m.GetClient(), c))
+	_ = "STUB: not implemented"
+	return nil
 }

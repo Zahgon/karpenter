@@ -36,62 +36,28 @@ type TopologyNodeFilter struct {
 }
 
 func MakeTopologyNodeFilter(p *corev1.Pod, taintPolicy corev1.NodeInclusionPolicy, affinityPolicy corev1.NodeInclusionPolicy) TopologyNodeFilter {
-	nodeSelectorRequirements := scheduling.NewLabelRequirements(p.Spec.NodeSelector)
-	// if we only have a label selector, that's the only requirement that must match
-	if p.Spec.Affinity == nil || p.Spec.Affinity.NodeAffinity == nil || p.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution == nil {
-		return TopologyNodeFilter{
-			Requirements:   []scheduling.Requirements{nodeSelectorRequirements},
-			TaintPolicy:    taintPolicy,
-			AffinityPolicy: affinityPolicy,
-			Tolerations:    p.Spec.Tolerations,
-		}
-	}
-
-	// otherwise, we need to match the combination of label selector and any term of the required node affinities since
-	// those terms are OR'd together
-	filter := TopologyNodeFilter{
-		TaintPolicy:    taintPolicy,
-		AffinityPolicy: affinityPolicy,
-		Tolerations:    p.Spec.Tolerations,
-	}
-	for _, term := range p.Spec.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms {
-		requirements := scheduling.NewRequirements()
-		requirements.Add(nodeSelectorRequirements.Values()...)
-		requirements.Add(scheduling.NewNodeSelectorRequirements(term.MatchExpressions...).Values()...)
-		filter.Requirements = append(filter.Requirements, requirements)
-	}
-
-	return filter
+	_ = "STUB: not implemented"
+	return *new(TopologyNodeFilter)
 }
+
+// if we only have a label selector, that's the only requirement that must match
+
+// otherwise, we need to match the combination of label selector and any term of the required node affinities since
+// those terms are OR'd together
 
 // Matches returns true if the TopologyNodeFilter doesn't prohibit node from the participating in the topology
 func (t TopologyNodeFilter) Matches(taints []corev1.Taint, requirements scheduling.Requirements, compatibilityOptions ...option.Function[scheduling.CompatibilityOptions]) bool {
-	matchesAffinity := true
-	if t.AffinityPolicy == corev1.NodeInclusionPolicyHonor {
-		matchesAffinity = t.matchesRequirements(requirements)
-	}
-	matchesTaints := true
-	if t.TaintPolicy == corev1.NodeInclusionPolicyHonor {
-		if err := scheduling.Taints(taints).Tolerates(t.Tolerations); err != nil {
-			matchesTaints = false
-		}
-	}
-	return matchesAffinity && matchesTaints
+	_ = "STUB: not implemented"
+	return false
 }
 
 // MatchesRequirements returns true if the TopologyNodeFilter doesn't prohibit a node with the requirements from
 // participating in the topology. This method allows checking the requirements from a scheduling.NodeClaim to see if the
 // node we will soon create participates in this topology.
 func (t TopologyNodeFilter) matchesRequirements(requirements scheduling.Requirements, compatibilityOptions ...option.Function[scheduling.CompatibilityOptions]) bool {
+	_ = "STUB: not implemented"
 	// no requirements, so it always matches
-	if len(t.Requirements) == 0 || t.AffinityPolicy == corev1.NodeInclusionPolicyIgnore {
-		return true
-	}
-	// these are an OR, so if any passes the filter passes
-	for _, req := range t.Requirements {
-		if err := requirements.Compatible(req, compatibilityOptions...); err == nil {
-			return true
-		}
-	}
 	return false
 }
+
+// these are an OR, so if any passes the filter passes

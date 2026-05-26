@@ -17,13 +17,10 @@ limitations under the License.
 package scheduling
 
 import (
-	"fmt"
 	"net"
 
-	"github.com/awslabs/operatorpkg/serrors"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 //go:generate go tool -modfile=../../go.tools.mod controller-gen object:headerFile="../../hack/boilerplate.go.txt" paths="."
@@ -43,73 +40,27 @@ type HostPort struct {
 	Protocol v1.Protocol
 }
 
-func (p HostPort) String() string {
-	return fmt.Sprintf("IP=%s Port=%d Proto=%s", p.IP, p.Port, p.Protocol)
-}
+func (p HostPort) String() string { _ = "STUB: not implemented"; return "" }
 
-func (p HostPort) Matches(rhs HostPort) bool {
-	if p.Protocol != rhs.Protocol {
-		return false
-	}
-	if p.Port != rhs.Port {
-		return false
-	}
-	// If IPs are unequal, they don't match unless one is an unspecified address "0.0.0.0" or the IPv6 address "::".
-	if !p.IP.Equal(rhs.IP) && !p.IP.IsUnspecified() && !rhs.IP.IsUnspecified() {
-		return false
-	}
-	return true
-}
+func (p HostPort) Matches(rhs HostPort) bool { _ = "STUB: not implemented"; return false }
 
-func NewHostPortUsage() *HostPortUsage {
-	return &HostPortUsage{
-		reserved: map[types.NamespacedName][]HostPort{},
-	}
-}
+// If IPs are unequal, they don't match unless one is an unspecified address "0.0.0.0" or the IPv6 address "::".
+
+func NewHostPortUsage() *HostPortUsage { _ = "STUB: not implemented"; return nil }
 
 // Add adds a port to the HostPortUsage
-func (u *HostPortUsage) Add(usedBy *v1.Pod, ports []HostPort) {
-	u.reserved[client.ObjectKeyFromObject(usedBy)] = ports
-}
+func (u *HostPortUsage) Add(usedBy *v1.Pod, ports []HostPort) { _ = "STUB: not implemented"; return }
 
 func (u *HostPortUsage) Conflicts(usedBy *v1.Pod, ports []HostPort) error {
-	for _, newEntry := range ports {
-		for podKey, entries := range u.reserved {
-			for _, existing := range entries {
-				if newEntry.Matches(existing) && podKey != client.ObjectKeyFromObject(usedBy) {
-					return serrors.Wrap(fmt.Errorf("pod hostport conflicts with existing hostport configuration"), "pod-hostport-ip", newEntry.IP, "pod-hostport-port", newEntry.Port, "pod-hostport-protocol", newEntry.Protocol, "existing-hostport-ip", existing.IP, "existing-hostport-port", existing.Port, "existing-hostport-protocol", existing.Protocol)
-				}
-			}
-		}
-	}
+	_ = "STUB: not implemented"
 	return nil
 }
 
 // DeletePod deletes all host port usage from the HostPortUsage that were created by the pod with the given name.
-func (u *HostPortUsage) DeletePod(key types.NamespacedName) {
-	delete(u.reserved, key)
-}
+func (u *HostPortUsage) DeletePod(key types.NamespacedName) { _ = "STUB: not implemented"; return }
 
-func GetHostPorts(pod *v1.Pod) []HostPort {
-	var usage []HostPort
-	for _, c := range pod.Spec.Containers {
-		for _, p := range c.Ports {
-			if p.HostPort == 0 {
-				continue
-			}
-			// Per the K8s docs, "If you don't specify the hostIP and Protocol explicitly, Kubernetes will use 0.0.0.0
-			// as the default hostIP and TCP as the default Protocol." In testing, and looking at the code the Protocol
-			// is defaulted to TCP, but it leaves the IP empty.
-			hostIP := p.HostIP
-			if hostIP == "" {
-				hostIP = "0.0.0.0"
-			}
-			usage = append(usage, HostPort{
-				IP:       net.ParseIP(hostIP),
-				Port:     p.HostPort,
-				Protocol: p.Protocol,
-			})
-		}
-	}
-	return usage
-}
+func GetHostPorts(pod *v1.Pod) []HostPort { _ = "STUB: not implemented"; return nil }
+
+// Per the K8s docs, "If you don't specify the hostIP and Protocol explicitly, Kubernetes will use 0.0.0.0
+// as the default hostIP and TCP as the default Protocol." In testing, and looking at the code the Protocol
+// is defaulted to TCP, but it leaves the IP empty.

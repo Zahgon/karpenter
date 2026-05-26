@@ -18,10 +18,6 @@ package injection
 
 import (
 	"context"
-	"flag"
-	"os"
-
-	"github.com/samber/lo"
 
 	"sigs.k8s.io/karpenter/pkg/operator/options"
 )
@@ -31,29 +27,13 @@ type controllerNameKeyType struct{}
 var controllerNameKey = controllerNameKeyType{}
 
 func WithControllerName(ctx context.Context, name string) context.Context {
-	return context.WithValue(ctx, controllerNameKey, name)
+	_ = "STUB: not implemented"
+	return *new(context.Context)
 }
 
-func GetControllerName(ctx context.Context) string {
-	name := ctx.Value(controllerNameKey)
-	if name == nil {
-		return ""
-	}
-	return name.(string)
-}
+func GetControllerName(ctx context.Context) string { _ = "STUB: not implemented"; return "" }
 
 func WithOptionsOrDie(ctx context.Context, opts ...options.Injectable) context.Context {
-	fs := &options.FlagSet{
-		FlagSet: flag.NewFlagSet("karpenter", flag.ContinueOnError),
-	}
-	for _, opt := range opts {
-		opt.AddFlags(fs)
-	}
-	for _, opt := range opts {
-		lo.Must0(opt.Parse(fs, os.Args[1:]...))
-	}
-	for _, opt := range opts {
-		ctx = opt.ToContext(ctx)
-	}
-	return ctx
+	_ = "STUB: not implemented"
+	return *new(context.Context)
 }

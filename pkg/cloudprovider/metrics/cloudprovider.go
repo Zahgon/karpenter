@@ -26,7 +26,6 @@ import (
 	v1 "sigs.k8s.io/karpenter/pkg/apis/v1"
 	"sigs.k8s.io/karpenter/pkg/cloudprovider"
 	"sigs.k8s.io/karpenter/pkg/metrics"
-	"sigs.k8s.io/karpenter/pkg/operator/injection"
 )
 
 const (
@@ -90,101 +89,54 @@ type decorator struct {
 // Do not decorate a `CloudProvider` multiple times or published metrics will contain
 // duplicated method call counts and latencies.
 func Decorate(cloudProvider cloudprovider.CloudProvider) cloudprovider.CloudProvider {
-	return &decorator{cloudProvider}
+	_ = "STUB: not implemented"
+	return *new(cloudprovider.CloudProvider)
 }
 
 func (d *decorator) Create(ctx context.Context, nodeClaim *v1.NodeClaim) (*v1.NodeClaim, error) {
-	method := "Create"
-	defer metrics.Measure(MethodDuration, getLabelsMapForDuration(ctx, d, method))()
-	nodeClaim, err := d.CloudProvider.Create(ctx, nodeClaim)
-	if err != nil {
-		ErrorsTotal.Inc(getLabelsMapForError(ctx, d, method, err))
-	}
-	return nodeClaim, err
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 func (d *decorator) Delete(ctx context.Context, nodeClaim *v1.NodeClaim) error {
-	method := "Delete"
-	defer metrics.Measure(MethodDuration, getLabelsMapForDuration(ctx, d, method))()
-	err := d.CloudProvider.Delete(ctx, nodeClaim)
-	if err != nil {
-		ErrorsTotal.Inc(getLabelsMapForError(ctx, d, method, err))
-	}
-	return err
+	_ = "STUB: not implemented"
+	return nil
 }
 
 func (d *decorator) Get(ctx context.Context, id string) (*v1.NodeClaim, error) {
-	method := "Get"
-	defer metrics.Measure(MethodDuration, getLabelsMapForDuration(ctx, d, method))()
-	nodeClaim, err := d.CloudProvider.Get(ctx, id)
-	if err != nil {
-		ErrorsTotal.Inc(getLabelsMapForError(ctx, d, method, err))
-	}
-	return nodeClaim, err
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 func (d *decorator) List(ctx context.Context) ([]*v1.NodeClaim, error) {
-	method := "List"
-	defer metrics.Measure(MethodDuration, getLabelsMapForDuration(ctx, d, method))()
-	nodeClaims, err := d.CloudProvider.List(ctx)
-	if err != nil {
-		ErrorsTotal.Inc(getLabelsMapForError(ctx, d, method, err))
-	}
-	return nodeClaims, err
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 func (d *decorator) GetInstanceTypes(ctx context.Context, nodePool *v1.NodePool) ([]*cloudprovider.InstanceType, error) {
-	method := "GetInstanceTypes"
-	defer metrics.Measure(MethodDuration, getLabelsMapForDuration(ctx, d, method))()
-	instanceType, err := d.CloudProvider.GetInstanceTypes(ctx, nodePool)
-	if err != nil {
-		ErrorsTotal.Inc(getLabelsMapForError(ctx, d, method, err))
-	}
-	return instanceType, err
+	_ = "STUB: not implemented"
+	return nil, nil
 }
 
 func (d *decorator) IsDrifted(ctx context.Context, nodeClaim *v1.NodeClaim) (cloudprovider.DriftReason, error) {
-	method := "IsDrifted"
-	defer metrics.Measure(MethodDuration, getLabelsMapForDuration(ctx, d, method))()
-	isDrifted, err := d.CloudProvider.IsDrifted(ctx, nodeClaim)
-	if err != nil {
-		ErrorsTotal.Inc(getLabelsMapForError(ctx, d, method, err))
-	}
-	return isDrifted, err
+	_ = "STUB: not implemented"
+	return *new(cloudprovider.DriftReason), nil
 }
 
 // getLabelsMapForDuration is a convenience func that constructs a map[string]string
 // for a prometheus Label map used to compose a duration metric spec
 func getLabelsMapForDuration(ctx context.Context, d *decorator, method string) map[string]string {
-	return map[string]string{
-		metricLabelController: injection.GetControllerName(ctx),
-		metricLabelMethod:     method,
-		metricLabelProvider:   d.Name(),
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // getLabelsMapForError is a convenience func that constructs a map[string]string
 // for a prometheus Label map used to compose a counter metric spec
 func getLabelsMapForError(ctx context.Context, d *decorator, method string, err error) map[string]string {
-	return map[string]string{
-		metricLabelController: injection.GetControllerName(ctx),
-		metricLabelMethod:     method,
-		metricLabelProvider:   d.Name(),
-		metricLabelError:      GetErrorTypeLabelValue(err),
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // GetErrorTypeLabelValue is a convenience func that returns
 // a string representation of well-known CloudProvider error types
-func GetErrorTypeLabelValue(err error) string {
-	switch {
-	case cloudprovider.IsInsufficientCapacityError(err):
-		return InsufficientCapacityError
-	case cloudprovider.IsNodeClaimNotFoundError(err):
-		return NodeClaimNotFoundError
-	case cloudprovider.IsNodeClassNotReadyError(err):
-		return NodeClassNotReadyError
-	default:
-		return MetricLabelErrorDefaultVal
-	}
-}
+func GetErrorTypeLabelValue(err error) string { _ = "STUB: not implemented"; return "" }

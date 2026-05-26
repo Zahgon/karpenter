@@ -18,41 +18,17 @@ package v1
 
 import (
 	"context"
-	"fmt"
-
-	"go.uber.org/multierr"
-	"k8s.io/apimachinery/pkg/util/validation"
 )
 
 // RuntimeValidate will be used to validate any part of the CRD that can not be validated at CRD creation
 func (in *NodePool) RuntimeValidate(ctx context.Context) (errs error) {
-	errs = multierr.Combine(in.Spec.Template.validateLabels(), in.Spec.Template.Spec.validateTaints(), in.Spec.Template.Spec.validateRequirements(ctx), in.Spec.Template.validateRequirementsNodePoolKeyDoesNotExist())
-	return errs
+	_ = "STUB: not implemented"
+	return nil
 }
 
-func (in *NodeClaimTemplate) validateLabels() (errs error) {
-	for key, value := range in.Labels {
-		if key == NodePoolLabelKey {
-			errs = multierr.Append(errs, fmt.Errorf("invalid key name %q in labels, restricted", key))
-		}
-		for _, err := range validation.IsQualifiedName(key) {
-			errs = multierr.Append(errs, fmt.Errorf("invalid key name %q in labels, %q", key, err))
-		}
-		for _, err := range validation.IsValidLabelValue(value) {
-			errs = multierr.Append(errs, fmt.Errorf("invalid value: %s for label[%s], %s", value, key, err))
-		}
-		if err := IsRestrictedLabel(key); err != nil {
-			errs = multierr.Append(errs, fmt.Errorf("invalid key name %q in labels, %s", key, err.Error()))
-		}
-	}
-	return errs
-}
+func (in *NodeClaimTemplate) validateLabels() (errs error) { _ = "STUB: not implemented"; return nil }
 
 func (in *NodeClaimTemplate) validateRequirementsNodePoolKeyDoesNotExist() (errs error) {
-	for _, requirement := range in.Spec.Requirements {
-		if requirement.Key == NodePoolLabelKey {
-			errs = multierr.Append(errs, fmt.Errorf("invalid key: %q in requirements, restricted", requirement.Key))
-		}
-	}
-	return errs
+	_ = "STUB: not implemented"
+	return nil
 }

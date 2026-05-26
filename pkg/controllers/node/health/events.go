@@ -17,8 +17,6 @@ limitations under the License.
 package health
 
 import (
-	"time"
-
 	corev1 "k8s.io/api/core/v1"
 
 	v1 "sigs.k8s.io/karpenter/pkg/apis/v1"
@@ -26,51 +24,11 @@ import (
 )
 
 func NodeRepairBlocked(node *corev1.Node, nodeClaim *v1.NodeClaim, nodePool *v1.NodePool, reason string) []events.Event {
-	return []events.Event{
-		{
-			InvolvedObject: node,
-			Type:           corev1.EventTypeWarning,
-			Reason:         events.NodeRepairBlocked,
-			Message:        reason,
-			DedupeValues:   []string{string(node.UID)},
-			DedupeTimeout:  time.Minute * 15,
-		},
-		{
-			InvolvedObject: node,
-			Type:           corev1.EventTypeWarning,
-			Reason:         events.NodeRepairBlocked,
-			Message:        reason,
-			DedupeValues:   []string{string(nodeClaim.UID)},
-			DedupeTimeout:  time.Minute * 15,
-		},
-		{
-			InvolvedObject: node,
-			Type:           corev1.EventTypeWarning,
-			Reason:         events.NodeRepairBlocked,
-			Message:        reason,
-			DedupeValues:   []string{string(nodePool.UID)},
-			DedupeTimeout:  time.Minute * 15,
-		},
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
 func NodeRepairBlockedUnmanagedNodeClaim(node *corev1.Node, nodeClaim *v1.NodeClaim, reason string) []events.Event {
-	return []events.Event{
-		{
-			InvolvedObject: node,
-			Type:           corev1.EventTypeWarning,
-			Reason:         events.NodeRepairBlocked,
-			Message:        reason,
-			DedupeValues:   []string{string(node.UID)},
-			DedupeTimeout:  time.Minute * 15,
-		},
-		{
-			InvolvedObject: node,
-			Type:           corev1.EventTypeWarning,
-			Reason:         events.NodeRepairBlocked,
-			Message:        reason,
-			DedupeValues:   []string{string(nodeClaim.UID)},
-			DedupeTimeout:  time.Minute * 15,
-		},
-	}
+	_ = "STUB: not implemented"
+	return nil
 }

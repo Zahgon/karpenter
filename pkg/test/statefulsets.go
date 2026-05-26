@@ -17,11 +17,7 @@ limitations under the License.
 package test
 
 import (
-	"fmt"
-
-	"github.com/imdario/mergo"
 	appsv1 "k8s.io/api/apps/v1"
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -33,33 +29,6 @@ type StatefulSetOptions struct {
 }
 
 func StatefulSet(overrides ...StatefulSetOptions) *appsv1.StatefulSet {
-	options := StatefulSetOptions{}
-	for _, opts := range overrides {
-		if err := mergo.Merge(&options, opts, mergo.WithOverride); err != nil {
-			panic(fmt.Sprintf("Failed to merge deployment options: %s", err))
-		}
-	}
-
-	objectMeta := NamespacedObjectMeta(options.ObjectMeta)
-
-	if options.PodOptions.Image == "" {
-		options.PodOptions.Image = "public.ecr.aws/eks-distro/kubernetes/pause:3.2"
-	}
-	if options.PodOptions.Labels == nil {
-		options.PodOptions.Labels = map[string]string{
-			"app": objectMeta.Name,
-		}
-	}
-	pod := Pod(options.PodOptions)
-	return &appsv1.StatefulSet{
-		ObjectMeta: objectMeta,
-		Spec: appsv1.StatefulSetSpec{
-			Replicas: new(options.Replicas),
-			Selector: &metav1.LabelSelector{MatchLabels: options.PodOptions.Labels},
-			Template: v1.PodTemplateSpec{
-				ObjectMeta: pod.ObjectMeta,
-				Spec:       pod.Spec,
-			},
-		},
-	}
+	_ = "STUB: not implemented"
+	return nil
 }

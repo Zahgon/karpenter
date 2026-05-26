@@ -21,8 +21,6 @@ import (
 
 	opmetrics "github.com/awslabs/operatorpkg/metrics"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/samber/lo"
-	"k8s.io/apimachinery/pkg/api/equality"
 )
 
 // Store is a mapping from a key to a list of Metrics
@@ -35,9 +33,7 @@ type Store struct {
 	store map[string][]*StoreMetric
 }
 
-func NewStore() *Store {
-	return &Store{store: map[string][]*StoreMetric{}}
-}
+func NewStore() *Store { _ = "STUB: not implemented"; return nil }
 
 // StoreMetric is a single state metric associated with a metrics.Gauge
 type StoreMetric struct {
@@ -47,62 +43,20 @@ type StoreMetric struct {
 }
 
 // update is an internal non-thread-safe method for updating metrics given a key in the Store
-func (s *Store) update(key string, metrics []*StoreMetric) {
-	for _, metric := range metrics {
-		metric.Set(metric.Value, metric.Labels)
-	}
-	// Cleanup old metrics if the old metric family has metrics that weren't updated by this round of metrics
-	if oldMetrics, ok := s.store[key]; ok {
-		for _, oldMetric := range oldMetrics {
-			if _, ok = lo.Find(metrics, func(m *StoreMetric) bool {
-				return oldMetric.GaugeMetric == m.GaugeMetric && equality.Semantic.DeepEqual(oldMetric.Labels, m.Labels)
-			}); !ok {
-				oldMetric.Delete(oldMetric.Labels)
-			}
-		}
-	}
-	s.store[key] = metrics
-}
+func (s *Store) update(key string, metrics []*StoreMetric) { _ = "STUB: not implemented"; return }
+
+// Cleanup old metrics if the old metric family has metrics that weren't updated by this round of metrics
 
 // Update calls the update() method internally
-func (s *Store) Update(key string, metrics []*StoreMetric) {
-	s.Lock()
-	defer s.Unlock()
-
-	s.update(key, metrics)
-}
+func (s *Store) Update(key string, metrics []*StoreMetric) { _ = "STUB: not implemented"; return }
 
 // ReplaceAll replaces all metrics in the store with the new metrics passes into the ReplaceAll function. This calls
 // the update method as normal for any keys that match existing keys while removing any keys that existed in the old
 // store but don't exist in the new store.
-func (s *Store) ReplaceAll(newStore map[string][]*StoreMetric) {
-	s.Lock()
-	defer s.Unlock()
-
-	for k, v := range newStore {
-		s.update(k, v)
-	}
-	for k := range s.store {
-		if _, ok := newStore[k]; !ok {
-			s.delete(k)
-		}
-	}
-}
+func (s *Store) ReplaceAll(newStore map[string][]*StoreMetric) { _ = "STUB: not implemented"; return }
 
 // delete is an internal non-thread-safe method for deleting metrics given a key in the Store
-func (s *Store) delete(key string) {
-	if metrics, ok := s.store[key]; ok {
-		for _, metric := range metrics {
-			metric.Delete(metric.Labels)
-		}
-		delete(s.store, key)
-	}
-}
+func (s *Store) delete(key string) { _ = "STUB: not implemented"; return }
 
 // Delete calls the delete() method internally
-func (s *Store) Delete(key string) {
-	s.Lock()
-	defer s.Unlock()
-
-	s.delete(key)
-}
+func (s *Store) Delete(key string) { _ = "STUB: not implemented"; return }

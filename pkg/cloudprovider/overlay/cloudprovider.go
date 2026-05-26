@@ -18,14 +18,12 @@ package overlay
 
 import (
 	"context"
-	"fmt"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "sigs.k8s.io/karpenter/pkg/apis/v1"
 	"sigs.k8s.io/karpenter/pkg/cloudprovider"
 	"sigs.k8s.io/karpenter/pkg/controllers/nodeoverlay"
-	"sigs.k8s.io/karpenter/pkg/operator/options"
 )
 
 type decorator struct {
@@ -37,19 +35,11 @@ type decorator struct {
 // Decorate returns a new `CloudProvider` instance that will delegate the GetInstanceTypes
 // calls to the argument, `cloudProvider`, and provide instance types with NodeOverlays applied to them. The
 func Decorate(cloudProvider cloudprovider.CloudProvider, kubeClient client.Client, store *nodeoverlay.InstanceTypeStore) cloudprovider.CloudProvider {
-	return &decorator{CloudProvider: cloudProvider, kubeClient: kubeClient, store: store}
+	_ = "STUB: not implemented"
+	return *new(cloudprovider.CloudProvider)
 }
 
 func (d *decorator) GetInstanceTypes(ctx context.Context, nodePool *v1.NodePool) ([]*cloudprovider.InstanceType, error) {
-	its, err := d.CloudProvider.GetInstanceTypes(ctx, nodePool)
-	if err != nil {
-		return []*cloudprovider.InstanceType{}, err
-	}
-	if options.FromContext(ctx).FeatureGates.NodeOverlay {
-		its, err = d.store.ApplyAll(nodePool.Name, its)
-		if err != nil {
-			return []*cloudprovider.InstanceType{}, fmt.Errorf("applying nodeoverlays, %w", err)
-		}
-	}
-	return its, nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }

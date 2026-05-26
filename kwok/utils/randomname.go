@@ -17,11 +17,7 @@ limitations under the License.
 package utils
 
 import (
-	"fmt"
-	"strings"
 	"sync"
-
-	"github.com/Pallinder/go-randomdata"
 )
 
 var (
@@ -33,9 +29,4 @@ var (
 // This is equivalent to test.RandomName() but avoids importing the test package,
 // which transitively pulls in envtest and causes init() panics in read-only
 // filesystem environments.
-func RandomName() string {
-	sequentialNumberLock.Lock()
-	defer sequentialNumberLock.Unlock()
-	sequentialNumber++
-	return strings.ToLower(fmt.Sprintf("%s-%d-%s", randomdata.SillyName(), sequentialNumber, randomdata.Alphanumeric(10)))
-}
+func RandomName() string { _ = "STUB: not implemented"; return "" }

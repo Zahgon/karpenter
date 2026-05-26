@@ -17,9 +17,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"sort"
-
-	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -53,7 +50,8 @@ type NodeSelectorRequirement struct {
 
 // AsNodeSelectorRequirement converts to corev1.NodeSelectorRequirement
 func (r NodeSelectorRequirement) AsNodeSelectorRequirement() corev1.NodeSelectorRequirement {
-	return corev1.NodeSelectorRequirement{Key: r.Key, Operator: r.Operator, Values: r.Values}
+	_ = "STUB: not implemented"
+	return *new(corev1.NodeSelectorRequirement)
 }
 
 type NodeOverlaySpec struct {
@@ -127,14 +125,6 @@ type NodeOverlayList struct {
 // the following things in precedence order:
 //  1. NodeOverlays that have a larger weight are ordered first
 //  2. If two NodeOverlays have the same weight, then the NodeOverlay with the name later in the alphabet will come first
-func (nol *NodeOverlayList) OrderByWeight() {
-	sort.Slice(nol.Items, func(a, b int) bool {
-		weightA := lo.FromPtr(nol.Items[a].Spec.Weight)
-		weightB := lo.FromPtr(nol.Items[b].Spec.Weight)
-		if weightA == weightB {
-			// Order Node Overlay by name for a consistent ordering when sorting equal weight
-			return nol.Items[a].Name > nol.Items[b].Name
-		}
-		return weightA > weightB
-	})
-}
+func (nol *NodeOverlayList) OrderByWeight() { _ = "STUB: not implemented"; return }
+
+// Order Node Overlay by name for a consistent ordering when sorting equal weight

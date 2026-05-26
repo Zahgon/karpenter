@@ -19,17 +19,11 @@ package testing
 import (
 	"context"
 
-	"github.com/go-logr/zapr"
-	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 // TestContextWithLogger returns a context with a logger to be used in tests
 func TestContextWithLogger(t zaptest.TestingT) context.Context {
-	opts := zaptest.WrapOptions(
-		zap.AddCaller(),
-		zap.Development(),
-	)
-	return log.IntoContext(context.Background(), zapr.NewLogger(zaptest.NewLogger(t, opts)))
+	_ = "STUB: not implemented"
+	return *new(context.Context)
 }

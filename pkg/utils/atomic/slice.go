@@ -26,36 +26,12 @@ type Slice[T any] struct {
 	values []T
 }
 
-func (a *Slice[T]) Reset() {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	a.values = nil
-}
+func (a *Slice[T]) Reset() { _ = "STUB: not implemented"; return }
 
-func (a *Slice[T]) Add(input T) {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	a.values = append(a.values, input)
-}
+func (a *Slice[T]) Add(input T) { _ = "STUB: not implemented"; return }
 
-func (a *Slice[T]) Range(f func(pool T) bool) {
-	a.mu.RLock()
-	defer a.mu.RUnlock()
-	for _, v := range a.values {
-		if !f(v) {
-			return
-		}
-	}
-}
+func (a *Slice[T]) Range(f func(pool T) bool) { _ = "STUB: not implemented"; return }
 
-func (a *Slice[T]) Set(values []T) {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	a.values = values
-}
+func (a *Slice[T]) Set(values []T) { _ = "STUB: not implemented"; return }
 
-func (a *Slice[T]) Len() int {
-	a.mu.RLock()
-	defer a.mu.RUnlock()
-	return len(a.values)
-}
+func (a *Slice[T]) Len() int { _ = "STUB: not implemented"; return 0 }

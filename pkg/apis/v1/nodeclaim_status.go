@@ -72,17 +72,13 @@ type NodeClaimStatus struct {
 }
 
 func (in *NodeClaim) StatusConditions() status.ConditionSet {
-	return status.NewReadyConditions(
-		ConditionTypeLaunched,
-		ConditionTypeRegistered,
-		ConditionTypeInitialized,
-	).For(in)
+	_ = "STUB: not implemented"
+	return *new(status.ConditionSet)
 }
 
-func (in *NodeClaim) GetConditions() []status.Condition {
-	return in.Status.Conditions
-}
+func (in *NodeClaim) GetConditions() []status.Condition { _ = "STUB: not implemented"; return nil }
 
 func (in *NodeClaim) SetConditions(conditions []status.Condition) {
-	in.Status.Conditions = conditions
+	_ = "STUB: not implemented"
+	return
 }

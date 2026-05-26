@@ -56,16 +56,10 @@ type NodePoolStatus struct {
 }
 
 func (in *NodePool) StatusConditions() status.ConditionSet {
-	return status.NewReadyConditions(
-		ConditionTypeValidationSucceeded,
-		ConditionTypeNodeClassReady,
-	).For(in)
+	_ = "STUB: not implemented"
+	return *new(status.ConditionSet)
 }
 
-func (in *NodePool) GetConditions() []status.Condition {
-	return in.Status.Conditions
-}
+func (in *NodePool) GetConditions() []status.Condition { _ = "STUB: not implemented"; return nil }
 
-func (in *NodePool) SetConditions(conditions []status.Condition) {
-	in.Status.Conditions = conditions
-}
+func (in *NodePool) SetConditions(conditions []status.Condition) { _ = "STUB: not implemented"; return }

@@ -19,24 +19,12 @@ package hydration
 import (
 	"context"
 
-	"github.com/awslabs/operatorpkg/reasonable"
-	"github.com/samber/lo"
-	"k8s.io/apimachinery/pkg/api/equality"
-	"k8s.io/klog/v2"
-	controllerruntime "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-
 	v1 "sigs.k8s.io/karpenter/pkg/apis/v1"
 	"sigs.k8s.io/karpenter/pkg/cloudprovider"
-	"sigs.k8s.io/karpenter/pkg/operator/injection"
-	utilscontroller "sigs.k8s.io/karpenter/pkg/utils/controller"
-	nodeclaimutils "sigs.k8s.io/karpenter/pkg/utils/nodeclaim"
 )
 
 // Controller hydrates information to the NodeClaim which is expected in newer versions of Karpenter, but would not
@@ -47,45 +35,18 @@ type Controller struct {
 }
 
 func NewController(kubeClient client.Client, cloudProvider cloudprovider.CloudProvider) *Controller {
-	return &Controller{
-		kubeClient:    kubeClient,
-		cloudProvider: cloudProvider,
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
 func (c *Controller) Reconcile(ctx context.Context, nc *v1.NodeClaim) (reconcile.Result, error) {
-	ctx = injection.WithControllerName(ctx, c.Name())
-	if nc.Status.NodeName != "" {
-		ctx = log.IntoContext(ctx, log.FromContext(ctx).WithValues("Node", klog.KRef("", nc.Status.NodeName)))
-	}
-
-	if !nodeclaimutils.IsManaged(nc, c.cloudProvider) {
-		return reconcile.Result{}, nil
-	}
-
-	stored := nc.DeepCopy()
-	nc.Labels = lo.Assign(nc.Labels, map[string]string{
-		v1.NodeClassLabelKey(nc.Spec.NodeClassRef.GroupKind()): nc.Spec.NodeClassRef.Name,
-	})
-	if !equality.Semantic.DeepEqual(stored, nc) {
-		if err := c.kubeClient.Patch(ctx, nc, client.MergeFrom(stored)); err != nil {
-			return reconcile.Result{}, client.IgnoreNotFound(err)
-		}
-	}
-	return reconcile.Result{}, nil
+	_ = "STUB: not implemented"
+	return *new(reconcile.Result), nil
 }
 
-func (c *Controller) Name() string {
-	return "nodeclaim.hydration"
-}
+func (c *Controller) Name() string { _ = "STUB: not implemented"; return "" }
 
 func (c *Controller) Register(ctx context.Context, m manager.Manager) error {
-	return controllerruntime.NewControllerManagedBy(m).
-		Named(c.Name()).
-		For(&v1.NodeClaim{}, builder.WithPredicates(nodeclaimutils.IsManagedPredicateFuncs(c.cloudProvider))).
-		WithOptions(controller.Options{
-			RateLimiter:             reasonable.RateLimiter(),
-			MaxConcurrentReconciles: utilscontroller.LinearScaleReconciles(utilscontroller.CPUCount(ctx), 1000, 5000),
-		}).
-		Complete(reconcile.AsReconciler(m.GetClient(), c))
+	_ = "STUB: not implemented"
+	return nil
 }

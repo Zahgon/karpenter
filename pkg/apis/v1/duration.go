@@ -17,12 +17,7 @@ limitations under the License.
 package v1
 
 import (
-	"encoding/json"
-	"fmt"
-	"slices"
 	"time"
-
-	"github.com/samber/lo"
 )
 
 const Never = "Never"
@@ -39,49 +34,18 @@ type NillableDuration struct {
 }
 
 func MustParseNillableDuration(val string) NillableDuration {
-	nd := NillableDuration{}
+	_ = "STUB: not implemented"
+	return *
+
 	// Use %q instead of %s to ensure that we unmarshal the value as a string and not an int
-	lo.Must0(json.Unmarshal(fmt.Appendf(nil, "%q", val), &nd))
-	return nd
+	new(NillableDuration)
 }
 
 // UnmarshalJSON implements the json.Unmarshaller interface.
-func (d *NillableDuration) UnmarshalJSON(b []byte) error {
-	var str string
-	err := json.Unmarshal(b, &str)
-	if err != nil {
-		return err
-	}
-	if str == Never {
-		return nil
-	}
-	pd, err := time.ParseDuration(str)
-	if err != nil {
-		return err
-	}
-	d.Raw = slices.Clone(b)
-	d.Duration = &pd
-	return nil
-}
+func (d *NillableDuration) UnmarshalJSON(b []byte) error { _ = "STUB: not implemented"; return nil }
 
 // MarshalJSON implements the json.Marshaler interface.
-func (d NillableDuration) MarshalJSON() ([]byte, error) {
-	if d.Raw != nil {
-		return d.Raw, nil
-	}
-	if d.Duration != nil {
-		return json.Marshal(d.String())
-	}
-	return json.Marshal(Never)
-}
+func (d NillableDuration) MarshalJSON() ([]byte, error) { _ = "STUB: not implemented"; return nil, nil }
 
 // ToUnstructured implements the value.UnstructuredConverter interface.
-func (d NillableDuration) ToUnstructured() any {
-	if d.Raw != nil {
-		return d.Raw
-	}
-	if d.Duration != nil {
-		return d.String()
-	}
-	return Never
-}
+func (d NillableDuration) ToUnstructured() any { _ = "STUB: not implemented"; return *new(any) }

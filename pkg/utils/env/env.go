@@ -17,110 +17,32 @@ limitations under the License.
 package env
 
 import (
-	"os"
-	"regexp"
-	"runtime/debug"
-	"strconv"
 	"time"
 )
 
 // WithDefaultInt returns the int value of the supplied environment variable or, if not present,
 // the supplied default value. If the int conversion fails, returns the default
-func WithDefaultInt(key string, def int) int {
-	val, ok := os.LookupEnv(key)
-	if !ok {
-		return def
-	}
-	i, err := strconv.Atoi(val)
-	if err != nil {
-		return def
-	}
-	return i
-}
+func WithDefaultInt(key string, def int) int { _ = "STUB: not implemented"; return 0 }
 
 // WithDefaultInt64 returns the int value of the supplied environment variable or, if not present,
 // the supplied default value. If the int conversion fails, returns the default
-func WithDefaultInt64(key string, def int64) int64 {
-	val, ok := os.LookupEnv(key)
-	if !ok {
-		return def
-	}
-	i, err := strconv.ParseInt(val, 10, 64)
-	if err != nil {
-		return def
-	}
-	return i
-}
+func WithDefaultInt64(key string, def int64) int64 { _ = "STUB: not implemented"; return 0 }
 
 // WithDefaultString returns the string value of the supplied environment variable or, if not present,
 // the supplied default value.
-func WithDefaultString(key string, def string) string {
-	val, ok := os.LookupEnv(key)
-	if !ok {
-		return def
-	}
-	return val
-}
+func WithDefaultString(key string, def string) string { _ = "STUB: not implemented"; return "" }
 
 // WithDefaultBool returns the boolean value of the supplied environment variable or, if not present,
 // the supplied default value.
-func WithDefaultBool(key string, def bool) bool {
-	val, ok := os.LookupEnv(key)
-	if !ok {
-		return def
-	}
-	parsedVal, err := strconv.ParseBool(val)
-	if err != nil {
-		return def
-	}
-	return parsedVal
-}
+func WithDefaultBool(key string, def bool) bool { _ = "STUB: not implemented"; return false }
 
 // WithDefaultDuration returns the duration value of the supplied environment variable or, if not present,
 // the supplied default value.
 func WithDefaultDuration(key string, def time.Duration) time.Duration {
-	val, ok := os.LookupEnv(key)
-	if !ok {
-		return def
-	}
-	parsedVal, err := time.ParseDuration(val)
-	if err != nil {
-		return def
-	}
-	return parsedVal
+	_ = "STUB: not implemented"
+	return *new(time.Duration)
 }
 
 // GetRevision function is based on the function defined under https://pkg.go.dev/knative.dev/pkg@v0.0.0-20240815051656-89743d9bbf7c/changeset
 // at https://github.com/knative/pkg/blob/89743d9bbf7c/changeset/commit.go#L51
-func GetRevision() string {
-	info, ok := debug.ReadBuildInfo()
-	if !ok {
-		return "unknown"
-	}
-
-	var revision string
-	var modified bool
-
-	for _, s := range info.Settings {
-		switch s.Key {
-		case "vcs.revision":
-			revision = s.Value
-		case "vcs.modified":
-			modified, _ = strconv.ParseBool(s.Value)
-		}
-	}
-
-	if revision == "" {
-		return "unknown"
-	}
-
-	if regexp.MustCompile(`^[a-f0-9]{40,64}$`).MatchString(revision) {
-		revision = revision[:7]
-	}
-
-	if modified {
-		revision += "-dirty"
-	}
-
-	return revision
-}
+func GetRevision() string { _ = "STUB: not implemented"; return "" }

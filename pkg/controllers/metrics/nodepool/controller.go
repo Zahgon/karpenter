@@ -18,16 +18,10 @@ package nodepool
 
 import (
 	"context"
-	"strings"
-	"time"
 
 	opmetrics "github.com/awslabs/operatorpkg/metrics"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	controllerruntime "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	crmetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
@@ -36,9 +30,7 @@ import (
 	v1 "sigs.k8s.io/karpenter/pkg/apis/v1"
 	"sigs.k8s.io/karpenter/pkg/cloudprovider"
 	"sigs.k8s.io/karpenter/pkg/metrics"
-	"sigs.k8s.io/karpenter/pkg/operator/injection"
 	"sigs.k8s.io/karpenter/pkg/state/cost"
-	nodepoolutils "sigs.k8s.io/karpenter/pkg/utils/nodepool"
 )
 
 var (
@@ -89,76 +81,36 @@ type Controller struct {
 
 // NewController constructs a controller instance
 func NewController(kubeClient client.Client, cloudProvider cloudprovider.CloudProvider, clusterCost *cost.ClusterCost) *Controller {
-	return &Controller{
-		kubeClient:    kubeClient,
-		cloudProvider: cloudProvider,
-		metricStore:   metrics.NewStore(),
-		clusterCost:   clusterCost,
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // Reconcile executes a termination control loop for the resource
 func (c *Controller) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
-	ctx = injection.WithControllerName(ctx, c.Name())
-
-	nodePool := &v1.NodePool{}
-	if err := c.kubeClient.Get(ctx, req.NamespacedName, nodePool); err != nil {
-		if errors.IsNotFound(err) {
-			c.metricStore.Delete(req.String())
-		}
-		return reconcile.Result{}, client.IgnoreNotFound(err)
-	}
-	if !nodepoolutils.IsManaged(nodePool, c.cloudProvider) {
-		return reconcile.Result{}, nil
-	}
-	c.metricStore.Update(req.String(), c.buildMetrics(nodePool))
-	// periodically update our metrics per nodepool even if nothing has changed
-	return reconcile.Result{RequeueAfter: 10 * time.Second}, nil
+	_ = "STUB: not implemented"
+	return *new(reconcile.Result), nil
 }
 
-func (c *Controller) buildMetrics(nodePool *v1.NodePool) (res []*metrics.StoreMetric) {
-	res = append(res, &metrics.StoreMetric{
-		GaugeMetric: ClusterCost,
-		Labels:      map[string]string{metrics.NodePoolLabel: nodePool.Name},
-		Value:       c.clusterCost.GetNodepoolCost(nodePool),
-	})
+// periodically update our metrics per nodepool even if nothing has changed
 
-	for gaugeVec, resourceList := range map[opmetrics.GaugeMetric]corev1.ResourceList{
-		Usage: nodePool.Status.Resources,
-		Limit: getLimits(nodePool),
-	} {
-		for k, v := range resourceList {
-			res = append(res, &metrics.StoreMetric{
-				GaugeMetric: gaugeVec,
-				Labels:      makeLabels(nodePool, strings.ReplaceAll(strings.ToLower(string(k)), "-", "_")),
-				Value:       lo.Ternary(k == corev1.ResourceCPU, float64(v.MilliValue())/float64(1000), float64(v.Value())),
-			})
-		}
-	}
-	return res
+func (c *Controller) buildMetrics(nodePool *v1.NodePool) (res []*metrics.StoreMetric) {
+	_ = "STUB: not implemented"
+	return nil
 }
 
 func getLimits(nodePool *v1.NodePool) corev1.ResourceList {
-	if nodePool.Spec.Limits != nil {
-		return corev1.ResourceList(nodePool.Spec.Limits)
-	}
-	return corev1.ResourceList{}
+	_ = "STUB: not implemented"
+	return *new(corev1.ResourceList)
 }
 
 func makeLabels(nodePool *v1.NodePool, resourceTypeName string) prometheus.Labels {
-	return map[string]string{
-		metrics.ResourceTypeLabel: resourceTypeName,
-		metrics.NodePoolLabel:     nodePool.Name,
-	}
+	_ = "STUB: not implemented"
+	return *new(prometheus.Labels)
 }
 
-func (c *Controller) Name() string {
-	return "metrics.nodepool"
-}
+func (c *Controller) Name() string { _ = "STUB: not implemented"; return "" }
 
 func (c *Controller) Register(_ context.Context, m manager.Manager) error {
-	return controllerruntime.NewControllerManagedBy(m).
-		Named(c.Name()).
-		For(&v1.NodePool{}, builder.WithPredicates(nodepoolutils.IsManagedPredicateFuncs(c.cloudProvider))).
-		Complete(c)
+	_ = "STUB: not implemented"
+	return nil
 }

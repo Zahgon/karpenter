@@ -17,15 +17,6 @@ limitations under the License.
 package v1
 
 import (
-	"fmt"
-	"math"
-	"strconv"
-
-	"github.com/awslabs/operatorpkg/serrors"
-	"github.com/mitchellh/hashstructure/v2"
-	"github.com/robfig/cron/v3"
-	"github.com/samber/lo"
-	"go.uber.org/multierr"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -173,19 +164,7 @@ const (
 
 type Limits v1.ResourceList
 
-func (l Limits) ExceededBy(resources v1.ResourceList) error {
-	if l == nil {
-		return nil
-	}
-	for resourceName, usage := range resources {
-		if limit, ok := l[resourceName]; ok {
-			if usage.Cmp(limit) > 0 {
-				return serrors.Wrap(fmt.Errorf("resource usage exceeds limit"), "resource-name", resourceName, "usage", usage.AsDec(), "limit", limit.AsDec())
-			}
-		}
-	}
-	return nil
-}
+func (l Limits) ExceededBy(resources v1.ResourceList) error { _ = "STUB: not implemented"; return nil }
 
 type NodeClaimTemplate struct {
 	ObjectMeta `json:"metadata,omitempty"` //nolint:kubeapilinter
@@ -255,22 +234,7 @@ type NodeClaimTemplateSpec struct {
 }
 
 // This is used to convert between the NodeClaim's NodeClaimSpec to the Nodepool NodeClaimTemplate's NodeClaimSpec.
-func (in *NodeClaimTemplate) ToNodeClaim() *NodeClaim {
-	return &NodeClaim{
-		ObjectMeta: metav1.ObjectMeta{
-			Labels:      in.Labels,
-			Annotations: in.Annotations,
-		},
-		Spec: NodeClaimSpec{
-			Taints:                 in.Spec.Taints,
-			StartupTaints:          in.Spec.StartupTaints,
-			Requirements:           in.Spec.Requirements,
-			NodeClassRef:           in.Spec.NodeClassRef,
-			TerminationGracePeriod: in.Spec.TerminationGracePeriod,
-			ExpireAfter:            in.Spec.ExpireAfter,
-		},
-	}
-}
+func (in *NodeClaimTemplate) ToNodeClaim() *NodeClaim { _ = "STUB: not implemented"; return nil }
 
 type ObjectMeta struct {
 	// labels is a map of string keys and values that can be used to organize and categorize
@@ -319,13 +283,7 @@ type NodePool struct {
 // 3. A field is removed from the hash calculations
 const NodePoolHashVersion = "v3"
 
-func (in *NodePool) Hash() string {
-	return fmt.Sprint(lo.Must(hashstructure.Hash(in.Spec.Template, hashstructure.FormatV2, &hashstructure.HashOptions{
-		SlicesAsSets:    true,
-		IgnoreZeroValue: true,
-		ZeroNil:         true,
-	})))
-}
+func (in *NodePool) Hash() string { _ = "STUB: not implemented"; return "" }
 
 // NodePoolList contains a list of NodePool
 // +kubebuilder:object:root=true
@@ -339,55 +297,35 @@ type NodePoolList struct {
 // amount of state that the disruption controller must reconcile, while allowing the GetAllowedDisruptionsByReason()
 // to bubble up any errors in validation.
 func (in *NodePool) MustGetAllowedDisruptions(c clock.Clock, numNodes int, reason DisruptionReason) int {
-	allowedDisruptions, err := in.GetAllowedDisruptionsByReason(c, numNodes, reason)
-	if err != nil {
-		return 0
-	}
-	return allowedDisruptions
+	_ = "STUB: not implemented"
+	return 0
 }
 
 // GetAllowedDisruptionsByReason returns the minimum allowed disruptions across all disruption budgets, for all disruption methods for a given nodepool
 func (in *NodePool) GetAllowedDisruptionsByReason(c clock.Clock, numNodes int, reason DisruptionReason) (int, error) {
-	allowedNodes := math.MaxInt32
-	var multiErr error
-	for _, budget := range in.Spec.Disruption.Budgets {
-		val, err := budget.GetAllowedDisruptions(c, numNodes)
-		if err != nil {
-			multiErr = multierr.Append(multiErr, err)
-		}
-		if budget.Reasons == nil || lo.Contains(budget.Reasons, reason) {
-			allowedNodes = lo.Min([]int{allowedNodes, val})
-		}
-	}
-	return allowedNodes, multiErr
+	_ = "STUB: not implemented"
+	return 0, nil
 }
 
 // GetAllowedDisruptions returns an intstr.IntOrString that can be used a comparison
 // for calculating if a disruption action is allowed. It returns an error if the
 // schedule is invalid. This returns MAXINT if the value is unbounded.
 func (in *Budget) GetAllowedDisruptions(c clock.Clock, numNodes int) (int, error) {
-	active, err := in.IsActive(c)
+	_ = "STUB: not implemented"
+	return 0, nil
+
 	// If the budget is misconfigured, fail closed.
-	if err != nil {
-		return 0, err
-	}
-	if !active {
-		return math.MaxInt32, nil
-	}
-	// This will round up to the nearest whole number. Therefore, a disruption can
-	// sometimes exceed the disruption budget. This is the same as how Kubernetes
-	// handles MaxUnavailable with PDBs. Take the case with 5% disruptions, but
-	// 10 nodes. Karpenter will opt to allow 1 node to be disrupted, rather than
-	// blocking all disruptions for this nodepool.
-	res, err := intstr.GetScaledValueFromIntOrPercent(new(GetIntStrFromValue(in.Nodes)), numNodes, true)
-	if err != nil {
-		// Should never happen since this is validated when the nodepool is applied
-		// If this value is incorrectly formatted, fail closed, since we don't know what
-		// they want here.
-		return 0, err
-	}
-	return res, nil
 }
+
+// This will round up to the nearest whole number. Therefore, a disruption can
+// sometimes exceed the disruption budget. This is the same as how Kubernetes
+// handles MaxUnavailable with PDBs. Take the case with 5% disruptions, but
+// 10 nodes. Karpenter will opt to allow 1 node to be disrupted, rather than
+// blocking all disruptions for this nodepool.
+
+// Should never happen since this is validated when the nodepool is applied
+// If this value is incorrectly formatted, fail closed, since we don't know what
+// they want here.
 
 // IsActive takes a clock as input and returns if a budget is active.
 // It walks back in time the time.Duration associated with the schedule,
@@ -396,25 +334,17 @@ func (in *Budget) GetAllowedDisruptions(c clock.Clock, numNodes int) (int, error
 // schedule is active, as any more schedule hits in between would only extend this
 // window. This ensures that any previous schedule hits for a schedule are considered.
 func (in *Budget) IsActive(c clock.Clock) (bool, error) {
-	if in.Schedule == nil && in.Duration == nil {
-		return true, nil
-	}
-	schedule, err := cron.ParseStandard(fmt.Sprintf("TZ=UTC %s", lo.FromPtr(in.Schedule)))
-	if err != nil {
-		// Should only occur if there's a discrepancy
-		// with the validation regex and the cron package.
-		return false, serrors.Wrap(fmt.Errorf("invariant violated, invalid cron, %w", err), "cron", schedule)
-	}
-	// Walk back in time for the duration associated with the schedule
-	checkPoint := c.Now().UTC().Add(-lo.FromPtr(in.Duration).Duration)
-	nextHit := schedule.Next(checkPoint)
-	return !nextHit.After(c.Now().UTC()), nil
+	_ = "STUB: not implemented"
+	return false, nil
 }
 
+// Should only occur if there's a discrepancy
+// with the validation regex and the cron package.
+
+// Walk back in time for the duration associated with the schedule
+
 func GetIntStrFromValue(str string) intstr.IntOrString {
+	_ = "STUB: not implemented"
 	// If err is nil, we treat it as an int.
-	if intVal, err := strconv.Atoi(str); err == nil {
-		return intstr.FromInt(intVal)
-	}
-	return intstr.FromString(str)
+	return *new(intstr.IntOrString)
 }

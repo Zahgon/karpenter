@@ -17,11 +17,7 @@ limitations under the License.
 package test
 
 import (
-	"fmt"
 	"time"
-
-	"github.com/imdario/mergo"
-	"github.com/samber/lo"
 
 	"sigs.k8s.io/karpenter/pkg/operator/options"
 )
@@ -60,40 +56,6 @@ type FeatureGates struct {
 	StaticCapacity          *bool
 }
 
-func Options(overrides ...OptionsFields) *options.Options {
-	opts := OptionsFields{}
-	for _, override := range overrides {
-		if err := mergo.Merge(&opts, override, mergo.WithOverride); err != nil {
-			panic(fmt.Sprintf("Failed to merge pod options: %s", err))
-		}
-	}
+func Options(overrides ...OptionsFields) *options.Options { _ = "STUB: not implemented"; return nil }
 
-	return &options.Options{
-		ServiceName:                      lo.FromPtrOr(opts.ServiceName, ""),
-		MetricsPort:                      lo.FromPtrOr(opts.MetricsPort, 8080),
-		HealthProbePort:                  lo.FromPtrOr(opts.HealthProbePort, 8081),
-		KubeClientQPS:                    lo.FromPtrOr(opts.KubeClientQPS, 200),
-		KubeClientBurst:                  lo.FromPtrOr(opts.KubeClientBurst, 300),
-		EnableProfiling:                  lo.FromPtrOr(opts.EnableProfiling, false),
-		DisableControllerWarmup:          lo.FromPtrOr(opts.DisableControllerWarmup, true),
-		DisableLeaderElection:            lo.FromPtrOr(opts.DisableLeaderElection, false),
-		DisableClusterStateObservability: lo.FromPtrOr(opts.DisableClusterStateObservability, false),
-		MemoryLimit:                      lo.FromPtrOr(opts.MemoryLimit, -1),
-		CPURequests:                      lo.FromPtrOr(opts.CPURequests, 5000), // use 5 threads to enforce parallelism
-		LogLevel:                         lo.FromPtrOr(opts.LogLevel, ""),
-		LogOutputPaths:                   lo.FromPtrOr(opts.LogOutputPaths, "stdout"),
-		LogErrorOutputPaths:              lo.FromPtrOr(opts.LogErrorOutputPaths, "stderr"),
-		BatchMaxDuration:                 lo.FromPtrOr(opts.BatchMaxDuration, 10*time.Second),
-		BatchIdleDuration:                lo.FromPtrOr(opts.BatchIdleDuration, time.Second),
-		PreferencePolicy:                 lo.FromPtrOr(opts.PreferencePolicy, options.PreferencePolicyRespect),
-		MinValuesPolicy:                  lo.FromPtrOr(opts.MinValuesPolicy, options.MinValuesPolicyStrict),
-		IgnoreDRARequests:                lo.FromPtrOr(opts.IgnoreDRARequests, true),
-		FeatureGates: options.FeatureGates{
-			NodeRepair:              lo.FromPtrOr(opts.FeatureGates.NodeRepair, false),
-			ReservedCapacity:        lo.FromPtrOr(opts.FeatureGates.ReservedCapacity, true),
-			SpotToSpotConsolidation: lo.FromPtrOr(opts.FeatureGates.SpotToSpotConsolidation, false),
-			NodeOverlay:             lo.FromPtrOr(opts.FeatureGates.NodeOverlay, false),
-			StaticCapacity:          lo.FromPtrOr(opts.FeatureGates.StaticCapacity, false),
-		},
-	}
-}
+// use 5 threads to enforce parallelism

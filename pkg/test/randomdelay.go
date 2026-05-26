@@ -43,64 +43,64 @@ type gomegaWrapper struct {
 	r     *rand.Rand
 }
 
-func (g *gomegaWrapper) randomDelay() {
-	g.mu.Lock()
-	delay := time.Duration(g.r.Intn(5)) * time.Millisecond
-	g.mu.Unlock()
-	time.Sleep(delay)
-}
+func (g *gomegaWrapper) randomDelay() { _ = "STUB: not implemented"; return }
 
 func (g *gomegaWrapper) Ω(actual interface{}, extra ...interface{}) types.Assertion {
-	g.randomDelay()
-	return g.inner.Ω(actual, extra...)
+	_ = "STUB: not implemented"
+	return *new(types.Assertion)
 }
 
 func (g *gomegaWrapper) Expect(actual interface{}, extra ...interface{}) types.Assertion {
-	g.randomDelay()
-	return g.inner.Expect(actual, extra...)
+	_ = "STUB: not implemented"
+	return *new(types.Assertion)
 }
 
 func (g *gomegaWrapper) ExpectWithOffset(offset int, actual interface{}, extra ...interface{}) types.Assertion {
-	g.randomDelay()
-	return g.inner.ExpectWithOffset(offset, actual, extra...)
+	_ = "STUB: not implemented"
+	return *new(types.Assertion)
 }
 
 func (g *gomegaWrapper) Eventually(actualOrCtx interface{}, args ...interface{}) types.AsyncAssertion {
-	g.randomDelay()
-	return g.inner.Eventually(actualOrCtx, args...)
+	_ = "STUB: not implemented"
+	return *new(types.AsyncAssertion)
 }
 
 func (g *gomegaWrapper) EventuallyWithOffset(offset int, actual interface{}, args ...interface{}) types.AsyncAssertion {
-	g.randomDelay()
-	return g.inner.EventuallyWithOffset(offset, actual, args...)
+	_ = "STUB: not implemented"
+	return *new(types.AsyncAssertion)
 }
 
 func (g *gomegaWrapper) Consistently(actualOrCtx interface{}, args ...interface{}) types.AsyncAssertion {
-	g.randomDelay()
-	return g.inner.Consistently(actualOrCtx, args...)
+	_ = "STUB: not implemented"
+	return *new(types.AsyncAssertion)
 }
 
 func (g *gomegaWrapper) ConsistentlyWithOffset(offset int, actualOrCtx interface{}, args ...interface{}) types.AsyncAssertion {
-	g.randomDelay()
-	return g.inner.ConsistentlyWithOffset(offset, actualOrCtx, args...)
+	_ = "STUB: not implemented"
+	return *new(types.AsyncAssertion)
 }
 
 func (g *gomegaWrapper) SetDefaultEventuallyTimeout(duration time.Duration) {
-	g.inner.SetDefaultEventuallyTimeout(duration)
+	_ = "STUB: not implemented"
+	return
 }
 
 func (g *gomegaWrapper) SetDefaultEventuallyPollingInterval(duration time.Duration) {
-	g.inner.SetDefaultEventuallyPollingInterval(duration)
+	_ = "STUB: not implemented"
+	return
 }
 
 func (g *gomegaWrapper) SetDefaultConsistentlyDuration(duration time.Duration) {
-	g.inner.SetDefaultConsistentlyDuration(duration)
+	_ = "STUB: not implemented"
+	return
 }
 
 func (g *gomegaWrapper) SetDefaultConsistentlyPollingInterval(duration time.Duration) {
-	g.inner.SetDefaultConsistentlyPollingInterval(duration)
+	_ = "STUB: not implemented"
+	return
 }
 
 func (g *gomegaWrapper) Inner() gomega.Gomega {
-	return g.inner
+	_ = "STUB: not implemented"
+	return *new(gomega.Gomega)
 }

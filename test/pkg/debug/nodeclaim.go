@@ -18,16 +18,9 @@ package debug
 
 import (
 	"context"
-	"fmt"
-	"time"
 
-	"k8s.io/apimachinery/pkg/api/errors"
-	controllerruntime "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	v1 "sigs.k8s.io/karpenter/pkg/apis/v1"
@@ -38,43 +31,21 @@ type NodeClaimController struct {
 }
 
 func NewNodeClaimController(kc client.Client) *NodeClaimController {
-	return &NodeClaimController{
-		kubeClient: kc,
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
 func (c *NodeClaimController) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
-	nc := &v1.NodeClaim{}
-	if err := c.kubeClient.Get(ctx, req.NamespacedName, nc); err != nil {
-		if errors.IsNotFound(err) {
-			fmt.Printf("[DELETED %s] NODECLAIM %s\n", time.Now().Format(time.RFC3339), req.String())
-		}
-		return reconcile.Result{}, client.IgnoreNotFound(err)
-	}
-	fmt.Printf("[CREATED/UPDATED %s] NODECLAIM %s %s\n", time.Now().Format(time.RFC3339), req.Name, c.GetInfo(nc))
-	return reconcile.Result{}, nil
+	_ = "STUB: not implemented"
+	return *new(reconcile.Result), nil
 }
 
 func (c *NodeClaimController) GetInfo(nc *v1.NodeClaim) string {
-	return fmt.Sprintf("ready=%t launched=%t registered=%t initialized=%t",
-		nc.StatusConditions().Root().IsTrue(),
-		nc.StatusConditions().Get(v1.ConditionTypeLaunched).IsTrue(),
-		nc.StatusConditions().Get(v1.ConditionTypeRegistered).IsTrue(),
-		nc.StatusConditions().Get(v1.ConditionTypeInitialized).IsTrue(),
-	)
+	_ = "STUB: not implemented"
+	return ""
 }
 
 func (c *NodeClaimController) Register(_ context.Context, m manager.Manager) error {
-	return controllerruntime.NewControllerManagedBy(m).
-		Named("nodeclaim").
-		For(&v1.NodeClaim{}).
-		WithEventFilter(predicate.Funcs{
-			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldNodeClaim := e.ObjectOld.(*v1.NodeClaim)
-				newNodeClaim := e.ObjectNew.(*v1.NodeClaim)
-				return c.GetInfo(oldNodeClaim) != c.GetInfo(newNodeClaim)
-			},
-		}).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 10, SkipNameValidation: new(true)}).
-		Complete(c)
+	_ = "STUB: not implemented"
+	return nil
 }

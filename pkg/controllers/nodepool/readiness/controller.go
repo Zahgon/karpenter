@@ -20,20 +20,12 @@ import (
 	"context"
 
 	"github.com/awslabs/operatorpkg/status"
-	"k8s.io/apimachinery/pkg/api/equality"
-	"k8s.io/apimachinery/pkg/api/errors"
-	controllerruntime "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	v1 "sigs.k8s.io/karpenter/pkg/apis/v1"
 	"sigs.k8s.io/karpenter/pkg/cloudprovider"
-	"sigs.k8s.io/karpenter/pkg/operator/injection"
-	utilscontroller "sigs.k8s.io/karpenter/pkg/utils/controller"
-	nodepoolutils "sigs.k8s.io/karpenter/pkg/utils/nodepool"
 )
 
 // Controller for the resource
@@ -44,69 +36,29 @@ type Controller struct {
 
 // NewController is a constructor
 func NewController(kubeClient client.Client, cloudProvider cloudprovider.CloudProvider) *Controller {
-	return &Controller{
-		kubeClient:    kubeClient,
-		cloudProvider: cloudProvider,
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
-func (c *Controller) Name() string {
-	return "nodepool.readiness"
-}
+func (c *Controller) Name() string { _ = "STUB: not implemented"; return "" }
 
 func (c *Controller) Reconcile(ctx context.Context, nodePool *v1.NodePool) (reconcile.Result, error) {
-	ctx = injection.WithControllerName(ctx, c.Name())
-	stored := nodePool.DeepCopy()
-
-	nodeClass, err := nodepoolutils.GetNodeClass(ctx, c.kubeClient, nodePool, c.cloudProvider)
-	if client.IgnoreNotFound(err) != nil {
-		return reconcile.Result{}, err
-	}
-	// Ignore NodePools which aren't using a supported NodeClass
-	if nodeClass == nil {
-		return reconcile.Result{}, nil
-	}
-	switch {
-	case errors.IsNotFound(err):
-		nodePool.StatusConditions().SetFalse(v1.ConditionTypeNodeClassReady, "NodeClassNotFound", "NodeClass not found on cluster")
-	case !nodeClass.GetDeletionTimestamp().IsZero():
-		nodePool.StatusConditions().SetFalse(v1.ConditionTypeNodeClassReady, "NodeClassTerminating", "NodeClass is Terminating")
-	default:
-		c.setReadyCondition(nodePool, nodeClass)
-	}
-
-	if !equality.Semantic.DeepEqual(stored, nodePool) {
-		// We use client.MergeFromWithOptimisticLock because patching a list with a JSON merge patch
-		// can cause races due to the fact that it fully replaces the list on a change
-		// Here, we are updating the status condition list
-		if err = c.kubeClient.Status().Patch(ctx, nodePool, client.MergeFromWithOptions(stored, client.MergeFromWithOptimisticLock{})); client.IgnoreNotFound(err) != nil {
-			if errors.IsConflict(err) {
-				return reconcile.Result{Requeue: true}, nil
-			}
-			return reconcile.Result{}, err
-		}
-	}
-	return reconcile.Result{}, nil
+	_ = "STUB: not implemented"
+	return *new(reconcile.Result), nil
 }
 
+// Ignore NodePools which aren't using a supported NodeClass
+
+// We use client.MergeFromWithOptimisticLock because patching a list with a JSON merge patch
+// can cause races due to the fact that it fully replaces the list on a change
+// Here, we are updating the status condition list
+
 func (c *Controller) setReadyCondition(nodePool *v1.NodePool, nodeClass status.Object) {
-	ready := nodeClass.StatusConditions().Get(status.ConditionReady)
-	if ready.IsUnknown() {
-		nodePool.StatusConditions().SetFalse(v1.ConditionTypeNodeClassReady, "NodeClassReadinessUnknown", "Node Class Readiness Unknown")
-	} else if ready.IsFalse() {
-		nodePool.StatusConditions().SetFalse(v1.ConditionTypeNodeClassReady, ready.Reason, ready.Message)
-	} else {
-		nodePool.StatusConditions().SetTrue(v1.ConditionTypeNodeClassReady)
-	}
+	_ = "STUB: not implemented"
+	return
 }
 
 func (c *Controller) Register(ctx context.Context, m manager.Manager) error {
-	b := controllerruntime.NewControllerManagedBy(m).
-		Named(c.Name()).
-		For(&v1.NodePool{}, builder.WithPredicates(nodepoolutils.IsManagedPredicateFuncs(c.cloudProvider))).
-		WithOptions(controller.Options{MaxConcurrentReconciles: utilscontroller.LinearScaleReconciles(utilscontroller.CPUCount(ctx), 10, 1000)})
-	for _, nodeClass := range c.cloudProvider.GetSupportedNodeClasses() {
-		b.Watches(nodeClass, nodepoolutils.NodeClassEventHandler(c.kubeClient))
-	}
-	return b.Complete(reconcile.AsReconciler(m.GetClient(), c))
+	_ = "STUB: not implemented"
+	return nil
 }

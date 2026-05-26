@@ -20,17 +20,11 @@ import (
 	"context"
 	"time"
 
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	controllerruntime "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"sigs.k8s.io/karpenter/pkg/controllers/state"
-	"sigs.k8s.io/karpenter/pkg/operator/injection"
-	utilscontroller "sigs.k8s.io/karpenter/pkg/utils/controller"
 )
 
 const (
@@ -47,41 +41,22 @@ type PodController struct {
 }
 
 func NewPodController(kubeClient client.Client, cluster *state.Cluster) *PodController {
-	return &PodController{
-		kubeClient: kubeClient,
-		cluster:    cluster,
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
-func (c *PodController) Name() string {
-	return "state.pod"
-}
+func (c *PodController) Name() string { _ = "STUB: not implemented"; return "" }
 
 func (c *PodController) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
-	ctx = injection.WithControllerName(ctx, c.Name())
-
-	pod := &v1.Pod{}
-	if err := c.kubeClient.Get(ctx, req.NamespacedName, pod); err != nil {
-		if errors.IsNotFound(err) {
-			// notify cluster state of the node deletion
-			c.cluster.DeletePod(req.NamespacedName)
-		}
-		return reconcile.Result{}, client.IgnoreNotFound(err)
-	}
-	if err := c.cluster.UpdatePod(ctx, pod); err != nil {
-		// We requeue here since the NotFound error is from finding the node for the binding
-		if errors.IsNotFound(err) {
-			return reconcile.Result{Requeue: true}, nil
-		}
-		return reconcile.Result{}, err
-	}
-	return reconcile.Result{RequeueAfter: stateRetryPeriod}, nil
+	_ = "STUB: not implemented"
+	return *new(reconcile.Result), nil
 }
 
+// notify cluster state of the node deletion
+
+// We requeue here since the NotFound error is from finding the node for the binding
+
 func (c *PodController) Register(ctx context.Context, m manager.Manager) error {
-	return controllerruntime.NewControllerManagedBy(m).
-		Named(c.Name()).
-		For(&v1.Pod{}).
-		WithOptions(controller.Options{MaxConcurrentReconciles: utilscontroller.LinearScaleReconciles(utilscontroller.CPUCount(ctx), minReconciles, maxReconciles)}).
-		Complete(c)
+	_ = "STUB: not implemented"
+	return nil
 }

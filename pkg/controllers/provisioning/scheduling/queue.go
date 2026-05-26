@@ -17,12 +17,8 @@ limitations under the License.
 package scheduling
 
 import (
-	"sort"
-
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
-
-	"sigs.k8s.io/karpenter/pkg/utils/resources"
 )
 
 // Queue is a queue of pods that is scheduled.  It's used to attempt to schedule pods as long as we are making progress
@@ -35,74 +31,33 @@ type Queue struct {
 
 // NewQueue constructs a new queue given the input pods, sorting them to optimize for bin-packing into nodes.
 func NewQueue(pods []*v1.Pod, podData map[types.UID]*PodData) *Queue {
-	sort.Slice(pods, byCPUAndMemoryDescending(pods, podData))
-	return &Queue{
-		pods:    pods,
-		lastLen: map[types.UID]int{},
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // Pop returns the next pod or false if no longer making progress
-func (q *Queue) Pop() (*v1.Pod, bool) {
-	if len(q.pods) == 0 {
-		return nil, false
-	}
-	p := q.pods[0]
+func (q *Queue) Pop() (*v1.Pod, bool) { _ = "STUB: not implemented"; return nil, false }
 
-	// If we are about to pop a pod when it was last pushed with the same number of pods in the queue, then
-	// we've cycled through all pods in the queue without making progress and can stop
-	if q.lastLen[p.UID] == len(q.pods) {
-		return nil, false
-	}
-
-	q.pods = q.pods[1:]
-	return p, true
-}
+// If we are about to pop a pod when it was last pushed with the same number of pods in the queue, then
+// we've cycled through all pods in the queue without making progress and can stop
 
 // Push a pod onto the queue, counting each time a pod is immediately requeued. This is used to detect staleness.
-func (q *Queue) Push(pod *v1.Pod) {
-	q.pods = append(q.pods, pod)
-	q.lastLen[pod.UID] = len(q.pods)
-}
+func (q *Queue) Push(pod *v1.Pod) { _ = "STUB: not implemented"; return }
 
-func (q *Queue) List() []*v1.Pod {
-	return q.pods
-}
+func (q *Queue) List() []*v1.Pod { _ = "STUB: not implemented"; return nil }
 
 func byCPUAndMemoryDescending(pods []*v1.Pod, podData map[types.UID]*PodData) func(i int, j int) bool {
-	return func(i, j int) bool {
-		lhsPod := pods[i]
-		rhsPod := pods[j]
-
-		lhs := podData[lhsPod.UID].Requests
-		rhs := podData[rhsPod.UID].Requests
-
-		cpuCmp := resources.Cmp(lhs[v1.ResourceCPU], rhs[v1.ResourceCPU])
-		if cpuCmp < 0 {
-			// LHS has less CPU, so it should be sorted after
-			return false
-		} else if cpuCmp > 0 {
-			return true
-		}
-		memCmp := resources.Cmp(lhs[v1.ResourceMemory], rhs[v1.ResourceMemory])
-
-		if memCmp < 0 {
-			return false
-		} else if memCmp > 0 {
-			return true
-		}
-
-		// If all else is equal, give a consistent ordering. This reduces the number of NominatePod events as we
-		// de-duplicate those based on identical content.
-
-		// unfortunately creation timestamp only has a 1-second resolution, so we would still re-order pods created
-		// during a deployment scale-up if we only looked at creation time
-		if lhsPod.CreationTimestamp != rhsPod.CreationTimestamp {
-			return lhsPod.CreationTimestamp.Before(&rhsPod.CreationTimestamp)
-		}
-
-		// pod UIDs aren't in any order, but since we first sort by creation time this only serves to consistently order
-		// pods created within the same second
-		return lhsPod.UID < rhsPod.UID
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
+
+// LHS has less CPU, so it should be sorted after
+
+// If all else is equal, give a consistent ordering. This reduces the number of NominatePod events as we
+// de-duplicate those based on identical content.
+
+// unfortunately creation timestamp only has a 1-second resolution, so we would still re-order pods created
+// during a deployment scale-up if we only looked at creation time
+
+// pod UIDs aren't in any order, but since we first sort by creation time this only serves to consistently order
+// pods created within the same second

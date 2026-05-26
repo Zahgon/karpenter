@@ -17,8 +17,6 @@ limitations under the License.
 package events
 
 import (
-	"fmt"
-	"strings"
 	"time"
 
 	"github.com/patrickmn/go-cache"
@@ -37,12 +35,7 @@ type Event struct {
 	RateLimiter    flowcontrol.RateLimiter
 }
 
-func (e Event) dedupeKey() string {
-	return fmt.Sprintf("%s-%s",
-		strings.ToLower(e.Reason),
-		strings.Join(e.DedupeValues, "-"),
-	)
-}
+func (e Event) dedupeKey() string { _ = "STUB: not implemented"; return "" }
 
 type Recorder interface {
 	Publish(...Event)
@@ -55,41 +48,22 @@ type recorder struct {
 
 const defaultDedupeTimeout = 2 * time.Minute
 
-func NewRecorder(r record.EventRecorder) Recorder {
-	return &recorder{
-		rec:   r,
-		cache: cache.New(defaultDedupeTimeout, 10*time.Second),
-	}
-}
+func NewRecorder(r record.EventRecorder) Recorder { _ = "STUB: not implemented"; return *new(Recorder) }
 
 // Publish creates a Kubernetes event using the passed event struct
-func (r *recorder) Publish(evts ...Event) {
-	for _, evt := range evts {
-		r.publishEvent(evt)
-	}
-}
+func (r *recorder) Publish(evts ...Event) { _ = "STUB: not implemented"; return }
 
 func (r *recorder) publishEvent(evt Event) {
+	_ = "STUB: not implemented"
 	// Override the timeout if one is set for an event
-	timeout := defaultDedupeTimeout
-	if evt.DedupeTimeout != 0 {
-		timeout = evt.DedupeTimeout
-	}
-	// Dedupe same events that involve the same object and are close together
-	if len(evt.DedupeValues) > 0 && !r.shouldCreateEvent(evt.dedupeKey(), timeout) {
-		return
-	}
-	// If the event is rate-limited, then validate we should create the event
-	if evt.RateLimiter != nil && !evt.RateLimiter.TryAccept() {
-		return
-	}
-	r.rec.Event(evt.InvolvedObject, evt.Type, evt.Reason, evt.Message)
+	return
 }
 
+// Dedupe same events that involve the same object and are close together
+
+// If the event is rate-limited, then validate we should create the event
+
 func (r *recorder) shouldCreateEvent(key string, timeout time.Duration) bool {
-	if _, exists := r.cache.Get(key); exists {
-		return false
-	}
-	r.cache.Set(key, nil, timeout)
-	return true
+	_ = "STUB: not implemented"
+	return false
 }

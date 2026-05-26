@@ -17,18 +17,11 @@ limitations under the License.
 package consistency
 
 import (
-	corev1 "k8s.io/api/core/v1"
-
 	v1 "sigs.k8s.io/karpenter/pkg/apis/v1"
 	"sigs.k8s.io/karpenter/pkg/events"
 )
 
 func FailedConsistencyCheckEvent(nodeClaim *v1.NodeClaim, message string) events.Event {
-	return events.Event{
-		InvolvedObject: nodeClaim,
-		Type:           corev1.EventTypeWarning,
-		Reason:         events.FailedConsistencyCheck,
-		Message:        message,
-		DedupeValues:   []string{string(nodeClaim.UID), message},
-	}
+	_ = "STUB: not implemented"
+	return *new(events.Event)
 }

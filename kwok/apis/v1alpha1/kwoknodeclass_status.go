@@ -27,13 +27,13 @@ type KWOKNodeClassStatus struct {
 }
 
 func (in *KWOKNodeClass) StatusConditions() status.ConditionSet {
-	return status.NewReadyConditions().For(in)
+	_ = "STUB: not implemented"
+	return *new(status.ConditionSet)
 }
 
-func (in *KWOKNodeClass) GetConditions() []status.Condition {
-	return in.Status.Conditions
-}
+func (in *KWOKNodeClass) GetConditions() []status.Condition { _ = "STUB: not implemented"; return nil }
 
 func (in *KWOKNodeClass) SetConditions(conditions []status.Condition) {
-	in.Status.Conditions = conditions
+	_ = "STUB: not implemented"
+	return
 }

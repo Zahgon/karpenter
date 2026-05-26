@@ -18,24 +18,15 @@ package podevents
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/equality"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/clock"
-	controllerruntime "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"sigs.k8s.io/karpenter/pkg/cloudprovider"
-	nodeutils "sigs.k8s.io/karpenter/pkg/utils/node"
-	nodeclaimutils "sigs.k8s.io/karpenter/pkg/utils/nodeclaim"
-	podutils "sigs.k8s.io/karpenter/pkg/utils/pod"
 )
 
 // dedupeTimeout is 10 seconds to reduce the number of writes to the APIServer, since pod scheduling and deletion events are very frequent.
@@ -52,73 +43,39 @@ type Controller struct {
 
 // NewController constructs a nodeclaim disruption controller
 func NewController(clk clock.Clock, kubeClient client.Client, cloudProvider cloudprovider.CloudProvider) *Controller {
-	return &Controller{
-		clock:         clk,
-		kubeClient:    kubeClient,
-		cloudProvider: cloudProvider,
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
 //nolint:gocyclo
 func (c *Controller) Reconcile(ctx context.Context, pod *corev1.Pod) (reconcile.Result, error) {
+	_ = "STUB: not implemented"
 	// If the pod doesn't have a node name, we don't know which node this pod refers to.
 	// or if this is a daemonset
-	if pod.Spec.NodeName == "" || podutils.IsOwnedByDaemonSet(pod) {
-		return reconcile.Result{}, nil
-	}
-
-	node := &corev1.Node{}
-	if err := c.kubeClient.Get(ctx, types.NamespacedName{Name: pod.Spec.NodeName}, node); err != nil {
-		return reconcile.Result{}, client.IgnoreNotFound(fmt.Errorf("getting node, %w", err))
-	}
-	// If there's no associated node claim, it's not a karpenter owned node.
-	nc, err := nodeutils.NodeClaimForNode(ctx, c.kubeClient, node)
-	if err != nil {
-		// if the nodeclaim doesn't exist, or has duplicates, ignore.
-		return reconcile.Result{}, nodeutils.IgnoreDuplicateNodeClaimError(nodeutils.IgnoreNodeClaimNotFoundError(fmt.Errorf("getting nodeclaims for node, %w", err)))
-	}
-	if !nodeclaimutils.IsManaged(nc, c.cloudProvider) {
-		return reconcile.Result{}, nil
-	}
-
-	// If we've set the lastPodEvent before and it hasn't been before the timeout, don't do anything
-	if !nc.Status.LastPodEventTime.Time.IsZero() && c.clock.Since(nc.Status.LastPodEventTime.Time) < dedupeTimeout {
-		return reconcile.Result{}, nil
-	}
-
-	// otherwise, set the pod event time to now
-	stored := nc.DeepCopy()
-	nc.Status.LastPodEventTime.Time = c.clock.Now()
-	if !equality.Semantic.DeepEqual(stored, nc) {
-		if err = c.kubeClient.Status().Patch(ctx, nc, client.MergeFrom(stored)); err != nil {
-			return reconcile.Result{}, client.IgnoreNotFound(err)
-		}
-	}
-	return reconcile.Result{}, nil
+	return *new(reconcile.Result), nil
 }
 
-func (c *Controller) Name() string {
-	return "nodeclaim.podevents"
-}
+// If there's no associated node claim, it's not a karpenter owned node.
+
+// if the nodeclaim doesn't exist, or has duplicates, ignore.
+
+// If we've set the lastPodEvent before and it hasn't been before the timeout, don't do anything
+
+// otherwise, set the pod event time to now
+
+func (c *Controller) Name() string { _ = "STUB: not implemented"; return "" }
 
 func (c *Controller) Register(ctx context.Context, m manager.Manager) error {
-	return controllerruntime.NewControllerManagedBy(m).
-		Named(c.Name()).
-		For(&corev1.Pod{}).
-		WithEventFilter(predicate.TypedFuncs[client.Object]{
-			// If a pod is bound to a node or goes terminal
-			UpdateFunc: func(e event.TypedUpdateEvent[client.Object]) bool {
-				oldPod := (e.ObjectOld).(*corev1.Pod)
-				newPod := (e.ObjectNew).(*corev1.Pod)
-				// if this is a newly bound pod
-				bound := oldPod.Spec.NodeName == "" && newPod.Spec.NodeName != ""
-				// if this is a newly terminal pod
-				terminal := (newPod.Spec.NodeName != "" && !podutils.IsTerminal(oldPod) && podutils.IsTerminal(newPod))
-				// if this is a newly terminating pod
-				terminating := (newPod.Spec.NodeName != "" && !podutils.IsTerminating(oldPod) && podutils.IsTerminating(newPod))
-				// return true if it was bound to a node, went terminal, or went terminating
-				return bound || terminal || terminating
-			},
-		}).
-		Complete(reconcile.AsReconciler(m.GetClient(), c))
+	_ = "STUB: not implemented"
+	return nil
 }
+
+// If a pod is bound to a node or goes terminal
+
+// if this is a newly bound pod
+
+// if this is a newly terminal pod
+
+// if this is a newly terminating pod
+
+// return true if it was bound to a node, went terminal, or went terminating

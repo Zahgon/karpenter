@@ -152,10 +152,8 @@ type NodeClassReference struct {
 }
 
 func (ncr *NodeClassReference) GroupKind() schema.GroupKind {
-	return schema.GroupKind{
-		Group: ncr.Group,
-		Kind:  ncr.Kind,
-	}
+	_ = "STUB: not implemented"
+	return *new(schema.GroupKind)
 }
 
 // +kubebuilder:object:generate=false

@@ -18,14 +18,9 @@ package disruption
 
 import (
 	"context"
-	"math"
-	"strconv"
 
-	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/clock"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	v1 "sigs.k8s.io/karpenter/pkg/apis/v1"
 )
@@ -34,44 +29,21 @@ import (
 // is non-zero, we use it to scale down the disruption costs of candidates that are going to expire.  Just after creation, the
 // disruption cost is highest, and it approaches zero as the node ages towards its expiration time.
 func LifetimeRemaining(clock clock.Clock, nodePool *v1.NodePool, nodeClaim *v1.NodeClaim) float64 {
-	remaining := 1.0
-	if nodeClaim.Spec.ExpireAfter.Duration != nil {
-		ageInSeconds := clock.Since(nodeClaim.CreationTimestamp.Time).Seconds()
-		totalLifetimeSeconds := nodeClaim.Spec.ExpireAfter.Seconds()
-		lifetimeRemainingSeconds := totalLifetimeSeconds - ageInSeconds
-		remaining = lo.Clamp(lifetimeRemainingSeconds/totalLifetimeSeconds, 0.0, 1.0)
-	}
-	return remaining
+	_ = "STUB: not implemented"
+	return 0
 }
 
 // EvictionCost returns the disruption cost computed for evicting the given pod.
-func EvictionCost(ctx context.Context, p *corev1.Pod) float64 {
-	cost := 1.0
-	podDeletionCostStr, ok := p.Annotations[corev1.PodDeletionCost]
-	if ok {
-		podDeletionCost, err := strconv.ParseFloat(podDeletionCostStr, 64)
-		if err != nil {
-			log.FromContext(ctx).Error(err, "failed parsing pod deletion cost",
-				"annotation", corev1.PodDeletionCost, "value", podDeletionCostStr, "pod", client.ObjectKeyFromObject(p))
-		} else {
-			// the pod deletion disruptionCost is in [-2147483647, 2147483647]
-			// the min pod disruptionCost makes one pod ~ -15 pods, and the max pod disruptionCost to ~ 17 pods.
-			cost += podDeletionCost / math.Pow(2, 27.0)
-		}
-	}
-	// the scheduling priority is in [-2147483648, 1000000000]
-	if p.Spec.Priority != nil {
-		cost += float64(*p.Spec.Priority) / math.Pow(2, 25)
-	}
+func EvictionCost(ctx context.Context, p *corev1.Pod) float64 { _ = "STUB: not implemented"; return 0 }
 
-	// overall we clamp the pod cost to the range [-10.0, 10.0] with the default being 1.0
-	return lo.Clamp(cost, -10.0, 10.0)
-}
+// the pod deletion disruptionCost is in [-2147483647, 2147483647]
+// the min pod disruptionCost makes one pod ~ -15 pods, and the max pod disruptionCost to ~ 17 pods.
+
+// the scheduling priority is in [-2147483648, 1000000000]
+
+// overall we clamp the pod cost to the range [-10.0, 10.0] with the default being 1.0
 
 func ReschedulingCost(ctx context.Context, pods []*corev1.Pod) float64 {
-	cost := 0.0
-	for _, p := range pods {
-		cost += EvictionCost(ctx, p)
-	}
-	return cost
+	_ = "STUB: not implemented"
+	return 0
 }

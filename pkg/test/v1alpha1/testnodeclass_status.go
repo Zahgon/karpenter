@@ -27,13 +27,13 @@ type TestNodeClassStatus struct {
 }
 
 func (t *TestNodeClass) StatusConditions() status.ConditionSet {
-	return status.NewReadyConditions().For(t)
+	_ = "STUB: not implemented"
+	return *new(status.ConditionSet)
 }
 
-func (t *TestNodeClass) GetConditions() []status.Condition {
-	return t.Status.Conditions
-}
+func (t *TestNodeClass) GetConditions() []status.Condition { _ = "STUB: not implemented"; return nil }
 
 func (t *TestNodeClass) SetConditions(conditions []status.Condition) {
-	t.Status.Conditions = conditions
+	_ = "STUB: not implemented"
+	return
 }

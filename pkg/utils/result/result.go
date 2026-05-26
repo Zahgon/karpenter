@@ -17,25 +17,13 @@ limitations under the License.
 package result
 
 import (
-	"math"
-	"time"
-
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 // Min returns the result that wants to requeue the soonest
 func Min(results ...reconcile.Result) (result reconcile.Result) {
-	min := time.Duration(math.MaxInt64)
-	for _, r := range results {
-		if r.IsZero() {
-			continue
-		}
-		if r.RequeueAfter < min {
-			min = r.RequeueAfter
-			result.RequeueAfter = min
-			//nolint:staticcheck
-			result.Requeue = true
-		}
-	}
-	return
+	_ = "STUB: not implemented"
+	return *new(reconcile.Result)
 }
+
+//nolint:staticcheck

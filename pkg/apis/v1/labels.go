@@ -17,9 +17,6 @@ limitations under the License.
 package v1
 
 import (
-	"fmt"
-	"strings"
-
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/sets"
@@ -124,41 +121,14 @@ var (
 )
 
 // IsRestrictedLabel returns an error if the label is restricted.
-func IsRestrictedLabel(key string) error {
-	if WellKnownLabels.Has(key) {
-		return nil
-	}
-	labelDomain := GetLabelDomain(key)
-	for restrictedLabelDomain := range RestrictedLabelDomains {
-		if labelDomain == restrictedLabelDomain || strings.HasSuffix(labelDomain, "."+restrictedLabelDomain) {
-			return fmt.Errorf("using label %s is not allowed as it might interfere with the internal provisioning logic; specify a well known label: %v, or a custom label that does not use a restricted domain: %v", key, sets.List(WellKnownLabels), sets.List(RestrictedLabelDomains))
-		}
-	}
-
-	if RestrictedLabels.Has(key) {
-		return fmt.Errorf("using label %s is not allowed as it might interfere with the internal provisioning logic; specify a well known label: %v, or a custom label that does not use a restricted domain: %v", key, sets.List(WellKnownLabels), sets.List(RestrictedLabelDomains))
-	}
-	return nil
-}
+func IsRestrictedLabel(key string) error { _ = "STUB: not implemented"; return nil }
 
 // HasKnownValues returns an error if the requirement has well known values and is only presented with unknown values.
 func HasKnownValues(requirement NodeSelectorRequirementWithMinValues) error {
-	if !WellKnownLabels.Has(requirement.Key) {
-		return nil
-	}
-	if !WellKnownValuesForRequirements[requirement.Key].HasAny(requirement.Values...) {
-		return fmt.Errorf("invalid values: %v for key: %s, expected one of: %v", requirement.Values, requirement.Key, WellKnownValuesForRequirements[requirement.Key].UnsortedList())
-	}
+	_ = "STUB: not implemented"
 	return nil
 }
 
-func GetLabelDomain(key string) string {
-	if parts := strings.SplitN(key, "/", 2); len(parts) == 2 {
-		return parts[0]
-	}
-	return ""
-}
+func GetLabelDomain(key string) string { _ = "STUB: not implemented"; return "" }
 
-func NodeClassLabelKey(gk schema.GroupKind) string {
-	return fmt.Sprintf("%s/%s", gk.Group, strings.ToLower(gk.Kind))
-}
+func NodeClassLabelKey(gk schema.GroupKind) string { _ = "STUB: not implemented"; return "" }

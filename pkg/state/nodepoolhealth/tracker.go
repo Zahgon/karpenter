@@ -42,116 +42,44 @@ type Tracker struct {
 	buffer ringbuffer.RingBuffer[bool]
 }
 
-func NewTracker(capacity int) *Tracker {
-	return &Tracker{
-		buffer: *ringbuffer.New[bool](capacity),
-	}
-}
+func NewTracker(capacity int) *Tracker { _ = "STUB: not implemented"; return nil }
 
-func (t *Tracker) Update(success bool) {
-	t.Lock()
-	defer t.Unlock()
+func (t *Tracker) Update(success bool) { _ = "STUB: not implemented"; return }
 
-	t.buffer.Insert(success)
-}
+func (t *Tracker) Reset() { _ = "STUB: not implemented"; return }
 
-func (t *Tracker) Reset() {
-	t.Lock()
-	defer t.Unlock()
+func (t *Tracker) Status() Status { _ = "STUB: not implemented"; return *new(Status) }
 
-	t.buffer.Reset()
-}
+// Count number of true and false
 
-func (t *Tracker) Status() Status {
-	t.RLock()
-	defer t.RUnlock()
+// Determine health status based on threshold
 
-	if t.buffer.Len() == 0 {
-		return StatusUnknown
-	}
-	// Count number of true and false
-	var unhealthyCount int
-	for _, value := range t.buffer.Items() {
-		if !value {
-			unhealthyCount++
-		}
-	}
-	// Determine health status based on threshold
-	if (float64(unhealthyCount) / float64(BufferSize)) >= ThresholdFalse {
-		return StatusUnhealthy
-	} else {
-		return StatusHealthy
-	}
-}
-
-func (t *Tracker) SetStatus(status Status) {
-	t.Lock()
-	defer t.Unlock()
-
-	switch status {
-	case StatusUnknown:
-		t.buffer.Reset()
-	case StatusHealthy:
-		t.buffer.Reset()
-		t.buffer.Insert(true)
-	case StatusUnhealthy:
-		t.buffer.Reset()
-		for range int(BufferSize * ThresholdFalse) {
-			t.buffer.Insert(false)
-		}
-	}
-}
+func (t *Tracker) SetStatus(status Status) { _ = "STUB: not implemented"; return }
 
 type State struct {
 	sync.RWMutex
 	trackers map[types.UID]*Tracker
 }
 
-func NewState() *State {
-	return &State{
-		trackers: make(map[types.UID]*Tracker),
-	}
-}
+func NewState() *State { _ = "STUB: not implemented"; return nil }
 
 func (s *State) nodePoolNodeRegistration(nodePoolUID types.UID) *Tracker {
-	s.RLock()
-	tracker, exists := s.trackers[nodePoolUID]
-	s.RUnlock()
-
-	if !exists {
-		s.Lock()
-		// Double-check after acquiring write lock
-		if tracker, exists = s.trackers[nodePoolUID]; !exists {
-			tracker = NewTracker(BufferSize)
-			s.trackers[nodePoolUID] = tracker
-		}
-		s.Unlock()
-	}
-	return tracker
+	_ = "STUB: not implemented"
+	return nil
 }
+
+// Double-check after acquiring write lock
 
 func (s *State) Status(nodePoolUID types.UID) Status {
-	return s.nodePoolNodeRegistration(nodePoolUID).Status()
+	_ = "STUB: not implemented"
+	return *new(Status)
 }
 
-func (s *State) Update(nodePoolUID types.UID, launchStatus bool) {
-	s.nodePoolNodeRegistration(nodePoolUID).Update(launchStatus)
-}
+func (s *State) Update(nodePoolUID types.UID, launchStatus bool) { _ = "STUB: not implemented"; return }
 
-func (s *State) SetStatus(nodePoolUID types.UID, status Status) {
-	s.nodePoolNodeRegistration(nodePoolUID).SetStatus(status)
-}
+func (s *State) SetStatus(nodePoolUID types.UID, status Status) { _ = "STUB: not implemented"; return }
 
 func (s *State) DryRun(nodePoolUID types.UID, launchStatus bool) *Tracker {
-	trackerCopy := NewTracker(BufferSize)
-	originalTracker := s.nodePoolNodeRegistration(nodePoolUID)
-
-	originalTracker.RLock()
-	for _, item := range originalTracker.buffer.Items() {
-		trackerCopy.buffer.Insert(item)
-	}
-	originalTracker.RUnlock()
-
-	trackerCopy.Update(launchStatus)
-	return trackerCopy
+	_ = "STUB: not implemented"
+	return nil
 }

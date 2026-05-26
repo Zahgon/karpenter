@@ -17,17 +17,8 @@ limitations under the License.
 package scheduling
 
 import (
-	"fmt"
-	"strings"
-
-	"github.com/awslabs/operatorpkg/serrors"
-	"github.com/samber/lo"
-	"go.uber.org/multierr"
 	corev1 "k8s.io/api/core/v1"
 	cloudproviderapi "k8s.io/cloud-provider/api"
-
-	"sigs.k8s.io/karpenter/pkg/operator/logging"
-	"sigs.k8s.io/karpenter/pkg/utils/pretty"
 
 	v1 "sigs.k8s.io/karpenter/pkg/apis/v1"
 )
@@ -54,57 +45,19 @@ var KnownEphemeralTaintKeyPrefixes = []string{
 // IsKnownEphemeralTaint reports whether the given taint is in KnownEphemeralTaints
 // (exact match on key/value/effect) or has a key matching any prefix in
 // KnownEphemeralTaintKeyPrefixes.
-func IsKnownEphemeralTaint(taint *corev1.Taint) bool {
-	if taint == nil {
-		return false
-	}
-	for i := range KnownEphemeralTaints {
-		if KnownEphemeralTaints[i].MatchTaint(taint) {
-			return true
-		}
-	}
-	for _, prefix := range KnownEphemeralTaintKeyPrefixes {
-		if strings.HasPrefix(taint.Key, prefix) {
-			return true
-		}
-	}
-	return false
-}
+func IsKnownEphemeralTaint(taint *corev1.Taint) bool { _ = "STUB: not implemented"; return false }
 
 // Taints is a decorated alias type for []corev1.Taint
 type Taints []corev1.Taint
 
 // ToleratesPod returns true if the pod tolerates all taints.
-func (ts Taints) ToleratesPod(pod *corev1.Pod) error {
-	return ts.Tolerates(pod.Spec.Tolerations)
-}
+func (ts Taints) ToleratesPod(pod *corev1.Pod) error { _ = "STUB: not implemented"; return nil }
 
 // Tolerates returns true if the toleration slice tolerate all taints.
 func (ts Taints) Tolerates(tolerations []corev1.Toleration) (errs error) {
-	for i := range ts {
-		taint := ts[i]
-		tolerates := false
-		for _, t := range tolerations {
-			tolerates = tolerates || t.ToleratesTaint(logging.NopLogger, &taint, true)
-		}
-		if !tolerates {
-			errs = multierr.Append(errs, serrors.Wrap(fmt.Errorf("did not tolerate taint"), "taint", pretty.Taint(taint)))
-		}
-	}
-	return errs
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // Merge merges in taints with the passed in taints.
-func (ts Taints) Merge(with Taints) Taints {
-	res := lo.Map(ts, func(t corev1.Taint, _ int) corev1.Taint {
-		return t
-	})
-	for _, taint := range with {
-		if _, ok := lo.Find(res, func(t corev1.Taint) bool {
-			return taint.MatchTaint(&t)
-		}); !ok {
-			res = append(res, taint)
-		}
-	}
-	return res
-}
+func (ts Taints) Merge(with Taints) Taints { _ = "STUB: not implemented"; return *new(Taints) }

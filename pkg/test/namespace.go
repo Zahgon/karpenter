@@ -17,9 +17,6 @@ limitations under the License.
 package test
 
 import (
-	"fmt"
-
-	"github.com/imdario/mergo"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -31,13 +28,6 @@ type NamespaceOptions struct {
 
 // Namespace creates a Namespace.
 func Namespace(overrides ...NamespaceOptions) *corev1.Namespace {
-	options := NamespaceOptions{}
-	for _, opts := range overrides {
-		if err := mergo.Merge(&options, opts, mergo.WithOverride); err != nil {
-			panic(fmt.Sprintf("Failed to merge namespace options: %s", err))
-		}
-	}
-	return &corev1.Namespace{
-		ObjectMeta: ObjectMeta(options.ObjectMeta),
-	}
+	_ = "STUB: not implemented"
+	return nil
 }

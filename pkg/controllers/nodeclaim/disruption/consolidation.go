@@ -19,10 +19,8 @@ package disruption
 import (
 	"context"
 
-	"github.com/samber/lo"
 	"k8s.io/utils/clock"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	v1 "sigs.k8s.io/karpenter/pkg/apis/v1"
@@ -36,48 +34,16 @@ type Consolidation struct {
 
 //nolint:gocyclo
 func (c *Consolidation) Reconcile(ctx context.Context, nodePool *v1.NodePool, nodeClaim *v1.NodeClaim) (reconcile.Result, error) {
-	hasConsolidatableCondition := nodeClaim.StatusConditions().Get(v1.ConditionTypeConsolidatable) != nil
-
-	// 1. If Consolidation isn't enabled, remove the consolidatable status condition
-	if nodePool.Spec.Disruption.ConsolidateAfter.Duration == nil {
-		if hasConsolidatableCondition {
-			_ = nodeClaim.StatusConditions().Clear(v1.ConditionTypeConsolidatable)
-			log.FromContext(ctx).V(1).Info("removing consolidatable status condition", "reason", "consolidation is disabled")
-		}
-		return reconcile.Result{}, nil
-	}
-	initialized := nodeClaim.StatusConditions().Get(v1.ConditionTypeInitialized)
-	// 2. If NodeClaim is not initialized, remove the consolidatable status condition
-	if !initialized.IsTrue() {
-		if hasConsolidatableCondition {
-			_ = nodeClaim.StatusConditions().Clear(v1.ConditionTypeConsolidatable)
-			log.FromContext(ctx).V(1).Info("removing consolidatable status condition", "reason", "nodeclaim isn't initialized")
-		}
-		return reconcile.Result{}, nil
-	}
-
-	// If the lastPodEvent is zero, use the time that the nodeclaim was initialized, as that's when Karpenter recognizes that pods could have started scheduling
-	timeToCheck := lo.Ternary(!nodeClaim.Status.LastPodEventTime.IsZero(), nodeClaim.Status.LastPodEventTime.Time, initialized.LastTransitionTime.Time)
-
-	// Consider a node consolidatable by looking at the lastPodEvent status field on the nodeclaim.
-	if c.clock.Since(timeToCheck) < lo.FromPtr(nodePool.Spec.Disruption.ConsolidateAfter.Duration) {
-		if hasConsolidatableCondition {
-			_ = nodeClaim.StatusConditions().Clear(v1.ConditionTypeConsolidatable)
-			log.FromContext(ctx).V(1).Info("removing consolidatable status condition",
-				"reason", "consolidateAfter window not yet elapsed",
-				"lastPodEventTime", timeToCheck,
-				"consolidateAfter", lo.FromPtr(nodePool.Spec.Disruption.ConsolidateAfter.Duration),
-				"timeSincePodEvent", c.clock.Since(timeToCheck),
-			)
-		}
-		consolidatableTime := timeToCheck.Add(lo.FromPtr(nodePool.Spec.Disruption.ConsolidateAfter.Duration))
-		return reconcile.Result{RequeueAfter: consolidatableTime.Sub(c.clock.Now())}, nil
-	}
-
-	// 6. Otherwise, add the consolidatable status condition
-	nodeClaim.StatusConditions().SetTrue(v1.ConditionTypeConsolidatable)
-	if !hasConsolidatableCondition {
-		log.FromContext(ctx).V(1).Info("marking consolidatable")
-	}
-	return reconcile.Result{}, nil
+	_ = "STUB: not implemented"
+	return *new(reconcile.Result), nil
 }
+
+// 1. If Consolidation isn't enabled, remove the consolidatable status condition
+
+// 2. If NodeClaim is not initialized, remove the consolidatable status condition
+
+// If the lastPodEvent is zero, use the time that the nodeclaim was initialized, as that's when Karpenter recognizes that pods could have started scheduling
+
+// Consider a node consolidatable by looking at the lastPodEvent status field on the nodeclaim.
+
+// 6. Otherwise, add the consolidatable status condition

@@ -35,26 +35,29 @@ type TypedRateLimitingInterface[T comparable] struct {
 }
 
 func NewTypedRateLimitingInterface[T comparable](queueConfig workqueue.TypedQueueConfig[T]) *TypedRateLimitingInterface[T] {
-	return &TypedRateLimitingInterface[T]{Typed: workqueue.NewTypedWithConfig[T](queueConfig)}
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // AddAfter implements TypedRateLimitingInterface.
 func (q *TypedRateLimitingInterface[T]) AddAfter(item T, duration time.Duration) {
-	q.Add(item)
+	_ = "STUB: not implemented"
+
+	// AddRateLimited implements TypedRateLimitingInterface.
+	return
 }
 
-// AddRateLimited implements TypedRateLimitingInterface.
-func (q *TypedRateLimitingInterface[T]) AddRateLimited(item T) {
-	q.AddedRateLimitedLock.Lock()
-	q.AddedRatelimited = append(q.AddedRatelimited, item)
-	q.AddedRateLimitedLock.Unlock()
-	q.Add(item)
-}
+func (q *TypedRateLimitingInterface[T]) AddRateLimited(item T) { _ = "STUB: not implemented"; return }
 
 // Forget implements TypedRateLimitingInterface.
-func (q *TypedRateLimitingInterface[T]) Forget(item T) {}
+func (q *TypedRateLimitingInterface[T]) Forget(item T) {
+	_ = "STUB: not implemented"
 
-// NumRequeues implements TypedRateLimitingInterface.
+	// NumRequeues implements TypedRateLimitingInterface.
+	return
+}
+
 func (q *TypedRateLimitingInterface[T]) NumRequeues(item T) int {
+	_ = "STUB: not implemented"
 	return 0
 }

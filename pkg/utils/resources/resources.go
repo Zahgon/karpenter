@@ -19,153 +19,72 @@ package resources
 import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	resourcehelper "k8s.io/component-helpers/resource"
-
-	"sigs.k8s.io/karpenter/pkg/utils/pretty"
 )
 
 var Node = v1.ResourceName("nodes")
 
 // RequestsForPods returns the total resources of a variadic list of podspecs.
 func RequestsForPods(pods ...*v1.Pod) v1.ResourceList {
-	var resources []v1.ResourceList
-	for _, pod := range pods {
-		resources = append(resources, Ceiling(pod).Requests)
-	}
-	merged := Merge(resources...)
-	merged[v1.ResourcePods] = *resource.NewQuantity(int64(len(pods)), resource.DecimalExponent)
-	return merged
+	_ = "STUB: not implemented"
+	return *new(v1.ResourceList)
 }
 
 // LimitsForPods returns the total resources of a variadic list of podspecs
 func LimitsForPods(pods ...*v1.Pod) v1.ResourceList {
-	var resources []v1.ResourceList
-	for _, pod := range pods {
-		resources = append(resources, Ceiling(pod).Limits)
-	}
-	merged := Merge(resources...)
-	merged[v1.ResourcePods] = *resource.NewQuantity(int64(len(pods)), resource.DecimalExponent)
-	return merged
+	_ = "STUB: not implemented"
+	return *new(v1.ResourceList)
 }
 
 // Merge the resources from the variadic into a single v1.ResourceList
 func Merge(resources ...v1.ResourceList) v1.ResourceList {
-	if len(resources) == 0 {
-		return v1.ResourceList{}
-	}
-	result := make(v1.ResourceList, len(resources[0]))
-	for _, resourceList := range resources {
-		for resourceName, quantity := range resourceList {
-			current := result[resourceName]
-			current.Add(quantity)
-			result[resourceName] = current
-		}
-	}
-	return result
+	_ = "STUB: not implemented"
+	return *new(v1.ResourceList)
 }
 
 // MergeInto sums the resources from src into dest, modifying dest. If you need to repeatedly sum
 // multiple resource lists, it allocates less to continually sum into an existing list as opposed to
 // constructing a new one for each sum like Merge
 func MergeInto(dest v1.ResourceList, src v1.ResourceList) v1.ResourceList {
-	if dest == nil {
-		sz := len(src)
-		dest = make(v1.ResourceList, sz)
-	}
-	for resourceName, quantity := range src {
-		current := dest[resourceName]
-		current.Add(quantity)
-		dest[resourceName] = current
-	}
-	return dest
+	_ = "STUB: not implemented"
+	return *new(v1.ResourceList)
 }
 
 func Subtract(lhs, rhs v1.ResourceList) v1.ResourceList {
-	result := make(v1.ResourceList, len(lhs))
-	for k, v := range lhs {
-		result[k] = v.DeepCopy()
-	}
-	for resourceName := range lhs {
-		current := lhs[resourceName]
-		if rhsValue, ok := rhs[resourceName]; ok {
-			current.Sub(rhsValue)
-		}
-		result[resourceName] = current
-	}
-	return result
+	_ = "STUB: not implemented"
+	return *new(v1.ResourceList)
 }
 
 // SubtractFrom subtracts the src v1.ResourceList from the dest v1.ResourceList in-place
-func SubtractFrom(dest v1.ResourceList, src v1.ResourceList) {
-	if dest == nil {
-		sz := len(src)
-		dest = make(v1.ResourceList, sz)
-	}
-	for resourceName, quantity := range src {
-		current := dest[resourceName]
-		current.Sub(quantity)
-		dest[resourceName] = current
-	}
-}
+func SubtractFrom(dest v1.ResourceList, src v1.ResourceList) { _ = "STUB: not implemented"; return }
 
 // Ceiling computes the effective resource requirements for a given Pod,
 // using the same logic as the scheduler.
 func Ceiling(pod *v1.Pod) v1.ResourceRequirements {
-	return v1.ResourceRequirements{
-		Requests: resourcehelper.PodRequests(pod, resourcehelper.PodResourcesOptions{}),
-		Limits:   resourcehelper.PodLimits(pod, resourcehelper.PodResourcesOptions{}),
-	}
+	_ = "STUB: not implemented"
+	return *new(v1.ResourceRequirements)
 }
 
 // MaxResources returns the maximum quantities for a given list of resources
 func MaxResources(resources ...v1.ResourceList) v1.ResourceList {
-	resourceList := v1.ResourceList{}
-	for _, resource := range resources {
-		for resourceName, quantity := range resource {
-			if value, ok := resourceList[resourceName]; !ok || quantity.Cmp(value) > 0 {
-				resourceList[resourceName] = quantity
-			}
-		}
-	}
-	return resourceList
+	_ = "STUB: not implemented"
+	return *new(v1.ResourceList)
 }
 
 // Quantity parses the string value into a *Quantity
-func Quantity(value string) *resource.Quantity {
-	r := resource.MustParse(value)
-	return &r
-}
+func Quantity(value string) *resource.Quantity { _ = "STUB: not implemented"; return nil }
 
 // IsZero implements r.IsZero(). This method is provided to make some code a bit cleaner as the Quantity.IsZero() takes
 // a pointer receiver and map index expressions aren't addressable, so it can't be called directly.
-func IsZero(r resource.Quantity) bool {
-	return r.IsZero()
-}
+func IsZero(r resource.Quantity) bool { _ = "STUB: not implemented"; return false }
 
-func Cmp(lhs resource.Quantity, rhs resource.Quantity) int {
-	return lhs.Cmp(rhs)
-}
+func Cmp(lhs resource.Quantity, rhs resource.Quantity) int { _ = "STUB: not implemented"; return 0 }
 
 // Fits returns true if the candidate set of resources is less than or equal to the total set of resources.
 func Fits(candidate, total v1.ResourceList) bool {
+	_ = "STUB: not implemented"
 	// If any of the total resource values are negative then the resource will never fit
-	for _, quantity := range total {
-		if Cmp(*resource.NewScaledQuantity(0, resource.Kilo), quantity) > 0 {
-			return false
-		}
-	}
-	for resourceName, quantity := range candidate {
-		if Cmp(quantity, total[resourceName]) > 0 {
-			return false
-		}
-	}
-	return true
+	return false
 }
 
 // String returns a string version of the resource list suitable for presenting in a log
-func String(list v1.ResourceList) string {
-	if len(list) == 0 {
-		return "{}"
-	}
-	return pretty.Concise(list)
-}
+func String(list v1.ResourceList) string { _ = "STUB: not implemented"; return "" }

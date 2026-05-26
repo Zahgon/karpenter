@@ -21,4 +21,4 @@ import (
 )
 
 // SetDefaults for the NodePool
-func (in *NodePool) SetDefaults(_ context.Context) {}
+func (in *NodePool) SetDefaults(_ context.Context) { _ = "STUB: not implemented"; return }

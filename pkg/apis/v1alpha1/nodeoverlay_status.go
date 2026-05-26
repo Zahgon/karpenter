@@ -37,15 +37,13 @@ type NodeOverlayStatus struct {
 }
 
 func (in *NodeOverlay) StatusConditions() status.ConditionSet {
-	return status.NewReadyConditions(
-		ConditionTypeValidationSucceeded,
-	).For(in)
+	_ = "STUB: not implemented"
+	return *new(status.ConditionSet)
 }
 
-func (in *NodeOverlay) GetConditions() []status.Condition {
-	return in.Status.Conditions
-}
+func (in *NodeOverlay) GetConditions() []status.Condition { _ = "STUB: not implemented"; return nil }
 
 func (in *NodeOverlay) SetConditions(conditions []status.Condition) {
-	in.Status.Conditions = conditions
+	_ = "STUB: not implemented"
+	return
 }

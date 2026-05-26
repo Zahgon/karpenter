@@ -19,19 +19,12 @@ package validation
 import (
 	"context"
 
-	"k8s.io/apimachinery/pkg/api/equality"
-	"k8s.io/apimachinery/pkg/api/errors"
-	controllerruntime "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	v1 "sigs.k8s.io/karpenter/pkg/apis/v1"
 	"sigs.k8s.io/karpenter/pkg/cloudprovider"
-	"sigs.k8s.io/karpenter/pkg/operator/injection"
-	nodepoolutils "sigs.k8s.io/karpenter/pkg/utils/nodepool"
 )
 
 // Controller for the resource
@@ -42,45 +35,22 @@ type Controller struct {
 
 // NewController is a constructor
 func NewController(kubeClient client.Client, cloudProvider cloudprovider.CloudProvider) *Controller {
-	return &Controller{
-		kubeClient:    kubeClient,
-		cloudProvider: cloudProvider,
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
-func (c *Controller) Name() string {
-	return "nodepool.validation"
-}
+func (c *Controller) Name() string { _ = "STUB: not implemented"; return "" }
 
 func (c *Controller) Reconcile(ctx context.Context, nodePool *v1.NodePool) (reconcile.Result, error) {
-	ctx = injection.WithControllerName(ctx, c.Name())
-	if !nodepoolutils.IsManaged(nodePool, c.cloudProvider) {
-		return reconcile.Result{}, nil
-	}
-	stored := nodePool.DeepCopy()
-	if err := nodePool.RuntimeValidate(ctx); err != nil {
-		nodePool.StatusConditions().SetFalse(v1.ConditionTypeValidationSucceeded, "NodePoolValidationFailed", err.Error())
-	} else {
-		nodePool.StatusConditions().SetTrue(v1.ConditionTypeValidationSucceeded)
-	}
-	if !equality.Semantic.DeepEqual(stored, nodePool) {
-		// We use client.MergeFromWithOptimisticLock because patching a list with a JSON merge patch
-		// can cause races due to the fact that it fully replaces the list on a change
-		// Here, we are updating the status condition list
-		if e := c.kubeClient.Status().Patch(ctx, nodePool, client.MergeFromWithOptions(stored, client.MergeFromWithOptimisticLock{})); client.IgnoreNotFound(e) != nil {
-			if errors.IsConflict(e) {
-				return reconcile.Result{Requeue: true}, nil
-			}
-			return reconcile.Result{}, e
-		}
-	}
-	return reconcile.Result{}, nil
+	_ = "STUB: not implemented"
+	return *new(reconcile.Result), nil
 }
 
+// We use client.MergeFromWithOptimisticLock because patching a list with a JSON merge patch
+// can cause races due to the fact that it fully replaces the list on a change
+// Here, we are updating the status condition list
+
 func (c *Controller) Register(_ context.Context, m manager.Manager) error {
-	return controllerruntime.NewControllerManagedBy(m).
-		Named(c.Name()).
-		For(&v1.NodePool{}, builder.WithPredicates(nodepoolutils.IsManagedPredicateFuncs(c.cloudProvider))).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 10}).
-		Complete(reconcile.AsReconciler(m.GetClient(), c))
+	_ = "STUB: not implemented"
+	return nil
 }

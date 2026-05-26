@@ -21,32 +21,18 @@ type RingBuffer[T any] struct {
 	head   int
 }
 
-func New[T any](capacity int) *RingBuffer[T] {
-	return &RingBuffer[T]{
-		values: make([]T, 0, capacity),
-	}
-}
+func New[T any](capacity int) *RingBuffer[T] { _ = "STUB: not implemented"; return nil }
 
 func (b *RingBuffer[T]) Insert(value T) {
+	_ = "STUB: not implemented"
 	// If buffer is not full, append the new value
-	if len(b.values) < cap(b.values) {
-		b.values = append(b.values, value)
-		return
-	}
-	// If buffer is full, replace the oldest entry
-	b.values[b.head] = value
-	b.head = (b.head + 1) % cap(b.values)
+	return
 }
 
-func (b *RingBuffer[T]) Len() int {
-	return len(b.values)
-}
+// If buffer is full, replace the oldest entry
 
-func (b *RingBuffer[T]) Reset() {
-	b.values = b.values[:0]
-	b.head = 0
-}
+func (b *RingBuffer[T]) Len() int { _ = "STUB: not implemented"; return 0 }
 
-func (b *RingBuffer[T]) Items() []T {
-	return b.values
-}
+func (b *RingBuffer[T]) Reset() { _ = "STUB: not implemented"; return }
+
+func (b *RingBuffer[T]) Items() []T { _ = "STUB: not implemented"; return nil }

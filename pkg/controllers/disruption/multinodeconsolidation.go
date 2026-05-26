@@ -18,18 +18,11 @@ package disruption
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"math"
 	"time"
 
 	"github.com/awslabs/operatorpkg/option"
-	"github.com/samber/lo"
-	"k8s.io/apimachinery/pkg/util/sets"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	v1 "sigs.k8s.io/karpenter/pkg/apis/v1"
-	scheduler "sigs.k8s.io/karpenter/pkg/scheduling"
 )
 
 const MultiNodeConsolidationTimeoutDuration = 1 * time.Minute
@@ -41,134 +34,61 @@ type MultiNodeConsolidation struct {
 }
 
 func NewMultiNodeConsolidation(c consolidation, opts ...option.Function[MethodOptions]) *MultiNodeConsolidation {
-	o := option.Resolve(append([]option.Function[MethodOptions]{WithValidator(NewMultiConsolidationValidator(c))}, opts...)...)
-	return &MultiNodeConsolidation{
-		consolidation: c,
-		validator:     o.validator,
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // nolint:gocyclo
 func (m *MultiNodeConsolidation) ComputeCommands(ctx context.Context, disruptionBudgetMapping map[string]int, candidates ...*Candidate) ([]Command, error) {
-	if m.IsConsolidated() {
-		return []Command{}, nil
-	}
-	candidates = m.sortCandidates(candidates)
-
-	// In order, filter out all candidates that would violate the budget.
-	// Since multi-node consolidation relies on the ordering of
-	// these candidates, and does computation in batches of these nodes by
-	// simulateScheduling(nodes[0, n]), doing a binary search on n to find
-	// the optimal consolidation command, this pre-filters out nodes that
-	// would have violated the budget anyway, preserving the ordering
-	// and only considering a number of nodes that can be disrupted.
-	disruptableCandidates := make([]*Candidate, 0, len(candidates))
-	constrainedByBudgets := false
-	for _, candidate := range candidates {
-		// If there's disruptions allowed for the candidate's nodepool,
-		// add it to the list of candidates, and decrement the budget.
-		if disruptionBudgetMapping[candidate.NodePool.Name] == 0 {
-			constrainedByBudgets = true
-			continue
-		}
-		// Filter out empty candidates. If there was an empty node that wasn't consolidated before this, we should
-		// assume that it was due to budgets. If we don't filter out budgets, users who set a budget for `empty`
-		// can find their nodes disrupted here.
-		if len(candidate.reschedulablePods) == 0 {
-			continue
-		}
-		// set constrainedByBudgets to true if any node was a candidate but was constrained by a budget
-		disruptableCandidates = append(disruptableCandidates, candidate)
-		disruptionBudgetMapping[candidate.NodePool.Name]--
-	}
-
-	// Only consider a maximum batch of 100 NodeClaims to save on computation.
-	// This could be further configurable in the future.
-	maxParallel := lo.Clamp(len(disruptableCandidates), 0, 100)
-
-	cmd, err := m.firstNConsolidationOption(ctx, disruptableCandidates, maxParallel)
-	if err != nil {
-		return []Command{}, err
-	}
-
-	if cmd.Decision() == NoOpDecision {
-		// if there are no candidates because of a budget, don't mark
-		// as consolidated, as it's possible it should be consolidatable
-		// the next time we try to disrupt.
-		if !constrainedByBudgets {
-			m.markConsolidated()
-		}
-		return []Command{}, nil
-	}
-
-	if cmd, err = m.validator.Validate(ctx, cmd, commandValidationDelay); err != nil {
-		if IsValidationError(err) {
-			reason := getValidationFailureReason(err)
-			cmd.EmitRejectedEvents(m.recorder, reason)
-			return []Command{}, nil
-		}
-		return []Command{}, fmt.Errorf("validating consolidation, %w", err)
-	}
-	return []Command{cmd}, nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }
+
+// In order, filter out all candidates that would violate the budget.
+// Since multi-node consolidation relies on the ordering of
+// these candidates, and does computation in batches of these nodes by
+// simulateScheduling(nodes[0, n]), doing a binary search on n to find
+// the optimal consolidation command, this pre-filters out nodes that
+// would have violated the budget anyway, preserving the ordering
+// and only considering a number of nodes that can be disrupted.
+
+// If there's disruptions allowed for the candidate's nodepool,
+// add it to the list of candidates, and decrement the budget.
+
+// Filter out empty candidates. If there was an empty node that wasn't consolidated before this, we should
+// assume that it was due to budgets. If we don't filter out budgets, users who set a budget for `empty`
+// can find their nodes disrupted here.
+
+// set constrainedByBudgets to true if any node was a candidate but was constrained by a budget
+
+// Only consider a maximum batch of 100 NodeClaims to save on computation.
+// This could be further configurable in the future.
+
+// if there are no candidates because of a budget, don't mark
+// as consolidated, as it's possible it should be consolidatable
+// the next time we try to disrupt.
 
 // firstNConsolidationOption looks at the first N NodeClaims to determine if they can all be consolidated at once.  The
 // NodeClaims are sorted by increasing disruption order which correlates to likelihood of being able to consolidate the node
 // nolint:gocyclo
 func (m *MultiNodeConsolidation) firstNConsolidationOption(ctx context.Context, candidates []*Candidate, max int) (Command, error) {
+	_ = "STUB: not implemented"
 	// we always operate on at least two NodeClaims at once, for single NodeClaims standard consolidation will find all solutions
-	if len(candidates) < 2 {
-		return Command{}, nil
-	}
-	min := 1
-	if len(candidates) <= max {
-		max = len(candidates) - 1
-	}
-
-	lastSavedCommand := Command{}
-	// Set a timeout
-	timeoutCtx, cancel := context.WithTimeout(ctx, MultiNodeConsolidationTimeoutDuration)
-	defer cancel()
-	for min <= max {
-		mid := (min + max) / 2
-		candidatesToConsolidate := candidates[0 : mid+1]
-
-		// Pass the timeout context to ensure sub-operations can be canceled
-		cmd, err := m.computeConsolidation(timeoutCtx, candidatesToConsolidate...)
-		// context deadline exceeded will return to the top of the loop and either return nothing or the last saved command
-		if err != nil {
-			if errors.Is(err, context.DeadlineExceeded) {
-				ConsolidationTimeoutsTotal.Inc(map[string]string{ConsolidationTypeLabel: m.ConsolidationType()})
-				if lastSavedCommand.Candidates == nil {
-					log.FromContext(ctx).V(1).Info("failed to find a multi-node consolidation after timeout", "last_batch_size", (min+max)/2)
-					return Command{}, nil
-				}
-				log.FromContext(ctx).V(1).WithValues(lastSavedCommand.LogValues()...).Info("stopping multi-node consolidation after timeout, returning last valid command")
-				return lastSavedCommand, nil
-
-			}
-			return Command{}, err
-		}
-		// ensure that the action is sensical for replacements, see explanation on filterOutSameType for why this is
-		// required
-		validDecision := cmd.Decision() == DeleteDecision
-		if cmd.Decision() == ReplaceDecision {
-			cmd.Replacements[0], err = filterOutSameInstanceType(cmd.Replacements[0], candidatesToConsolidate)
-			// we check the error before the replacement instanceTypeOptions since we return nil for the replacement if we get an error
-			if err == nil && len(cmd.Replacements[0].InstanceTypeOptions) > 0 {
-				validDecision = true
-			}
-		}
-		if validDecision {
-			// We can consolidate NodeClaims [0,mid]
-			lastSavedCommand = cmd
-			min = mid + 1
-		} else {
-			max = mid - 1
-		}
-	}
-	return lastSavedCommand, nil
+	return *new(Command), nil
 }
+
+// Set a timeout
+
+// Pass the timeout context to ensure sub-operations can be canceled
+
+// context deadline exceeded will return to the top of the loop and either return nothing or the last saved command
+
+// ensure that the action is sensical for replacements, see explanation on filterOutSameType for why this is
+// required
+
+// we check the error before the replacement instanceTypeOptions since we return nil for the replacement if we get an error
+
+// We can consolidate NodeClaims [0,mid]
 
 // filterOutSameInstanceType filters out instance types that are more expensive than the cheapest instance type that is being
 // consolidated if the list of replacement instance types include one of the instance types that is being removed
@@ -187,52 +107,21 @@ func (m *MultiNodeConsolidation) firstNConsolidationOption(ctx context.Context, 
 // leaving the valid consolidation:
 // NodeClaims=[t3a.2xlarge, t3a.2xlarge, t3a.small] -> 1 of t3a.nano
 func filterOutSameInstanceType(replacement *Replacement, consolidate []*Candidate) (*Replacement, error) {
-	existingInstanceTypes := sets.New[string]()
-	pricesByInstanceType := map[string]float64{}
-
-	// get the price of the cheapest node that we currently are considering deleting indexed by instance type
-	for _, c := range consolidate {
-		existingInstanceTypes.Insert(c.instanceType.Name)
-		compatibleOfferings := c.instanceType.Offerings.Compatible(scheduler.NewLabelRequirements(c.Labels()))
-		if len(compatibleOfferings) == 0 {
-			continue
-		}
-		existingPrice, ok := pricesByInstanceType[c.instanceType.Name]
-		if !ok {
-			existingPrice = math.MaxFloat64
-		}
-		if p := compatibleOfferings.Cheapest().Price; p < existingPrice {
-			pricesByInstanceType[c.instanceType.Name] = p
-		}
-	}
-
-	maxPrice := math.MaxFloat64
-	for _, it := range replacement.InstanceTypeOptions {
-		// we are considering replacing multiple NodeClaims with a single NodeClaim of one of the same types, so the replacement
-		// node must be cheaper than the price of the existing node, or we should just keep that one and do a
-		// deletion only to reduce cluster disruption (fewer pods will re-schedule).
-		if existingInstanceTypes.Has(it.Name) {
-			if pricesByInstanceType[it.Name] < maxPrice {
-				maxPrice = pricesByInstanceType[it.Name]
-			}
-		}
-	}
-	var err error
-	replacement.NodeClaim, err = replacement.RemoveInstanceTypeOptionsByPriceAndMinValues(replacement.Requirements, maxPrice)
-	if err != nil {
-		return nil, err
-	}
-	return replacement, nil
+	_ = "STUB: not implemented"
+	return nil, nil
 }
+
+// get the price of the cheapest node that we currently are considering deleting indexed by instance type
+
+// we are considering replacing multiple NodeClaims with a single NodeClaim of one of the same types, so the replacement
+// node must be cheaper than the price of the existing node, or we should just keep that one and do a
+// deletion only to reduce cluster disruption (fewer pods will re-schedule).
 
 func (m *MultiNodeConsolidation) Reason() v1.DisruptionReason {
-	return v1.DisruptionReasonUnderutilized
+	_ = "STUB: not implemented"
+	return *new(v1.DisruptionReason)
 }
 
-func (m *MultiNodeConsolidation) Class() string {
-	return GracefulDisruptionClass
-}
+func (m *MultiNodeConsolidation) Class() string { _ = "STUB: not implemented"; return "" }
 
-func (m *MultiNodeConsolidation) ConsolidationType() string {
-	return MultiNodeConsolidationType
-}
+func (m *MultiNodeConsolidation) ConsolidationType() string { _ = "STUB: not implemented"; return "" }

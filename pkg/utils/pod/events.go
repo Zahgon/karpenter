@@ -17,7 +17,6 @@ limitations under the License.
 package pod
 
 import (
-	"fmt"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -26,31 +25,16 @@ import (
 )
 
 func InvalidDoNotDisruptAnnotationEvent(pod *corev1.Pod, message string) events.Event {
-	return events.Event{
-		InvolvedObject: pod,
-		Type:           corev1.EventTypeWarning,
-		Reason:         "InvalidDoNotDisruptAnnotation",
-		Message:        fmt.Sprintf("Invalid karpenter.sh/do-not-disrupt annotation: %s, ignoring annotation", message),
-		DedupeValues:   []string{string(pod.UID), message},
-	}
+	_ = "STUB: not implemented"
+	return *new(events.Event)
 }
 
 func DoNotDisruptUntilEvent(pod *corev1.Pod, disruptableAt time.Time) events.Event {
-	return events.Event{
-		InvolvedObject: pod,
-		Type:           corev1.EventTypeNormal,
-		Reason:         "DoNotDisruptUntil",
-		Message:        fmt.Sprintf("The karpenter.sh/do-not-disrupt grace period will elapse at %s", disruptableAt.Format(time.RFC3339)),
-		DedupeValues:   []string{string(pod.UID), disruptableAt.Format(time.RFC3339)},
-	}
+	_ = "STUB: not implemented"
+	return *new(events.Event)
 }
 
 func DoNotDisruptGracePeriodElapsedEvent(pod *corev1.Pod) events.Event {
-	return events.Event{
-		InvolvedObject: pod,
-		Type:           corev1.EventTypeNormal,
-		Reason:         "DoNotDisruptGracePeriodElapsed",
-		Message:        "The karpenter.sh/do-not-disrupt grace period has elapsed, pod is now disruptable",
-		DedupeValues:   []string{string(pod.UID)},
-	}
+	_ = "STUB: not implemented"
+	return *new(events.Event)
 }

@@ -19,17 +19,11 @@ package informer
 import (
 	"context"
 
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	controllerruntime "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"sigs.k8s.io/karpenter/pkg/controllers/state"
-	"sigs.k8s.io/karpenter/pkg/operator/injection"
-	utilscontroller "sigs.k8s.io/karpenter/pkg/utils/controller"
 )
 
 // NodeController reconciles nodes for the purpose of maintaining state regarding nodes that is expensive to compute.
@@ -40,38 +34,22 @@ type NodeController struct {
 
 // NewNodeController constructs a controller instance
 func NewNodeController(kubeClient client.Client, cluster *state.Cluster) *NodeController {
-	return &NodeController{
-		kubeClient: kubeClient,
-		cluster:    cluster,
-	}
+	_ = "STUB: not implemented"
+	return nil
 }
 
-func (c *NodeController) Name() string {
-	return "state.node"
-}
+func (c *NodeController) Name() string { _ = "STUB: not implemented"; return "" }
 
 func (c *NodeController) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
-	ctx = injection.WithControllerName(ctx, c.Name())
-
-	node := &v1.Node{}
-	if err := c.kubeClient.Get(ctx, req.NamespacedName, node); err != nil {
-		if errors.IsNotFound(err) {
-			// notify cluster state of the node deletion
-			c.cluster.DeleteNode(req.Name)
-		}
-		return reconcile.Result{}, client.IgnoreNotFound(err)
-	}
-	if err := c.cluster.UpdateNode(ctx, node); err != nil {
-		return reconcile.Result{}, err
-	}
-	// ensure it's aware of any nodes we discover, this is a no-op if the node is already known to our cluster state
-	return reconcile.Result{RequeueAfter: stateRetryPeriod}, nil
+	_ = "STUB: not implemented"
+	return *new(reconcile.Result), nil
 }
 
+// notify cluster state of the node deletion
+
+// ensure it's aware of any nodes we discover, this is a no-op if the node is already known to our cluster state
+
 func (c *NodeController) Register(ctx context.Context, m manager.Manager) error {
-	return controllerruntime.NewControllerManagedBy(m).
-		Named(c.Name()).
-		For(&v1.Node{}).
-		WithOptions(controller.Options{MaxConcurrentReconciles: utilscontroller.LinearScaleReconciles(utilscontroller.CPUCount(ctx), minReconciles, maxReconciles)}).
-		Complete(c)
+	_ = "STUB: not implemented"
+	return nil
 }

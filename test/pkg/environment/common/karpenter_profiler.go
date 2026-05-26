@@ -18,12 +18,7 @@ package common
 
 import (
 	"context"
-	"fmt"
-	"io"
-	"net/http"
-	"time"
 
-	"github.com/google/pprof/profile"
 	. "github.com/onsi/ginkgo/v2"
 )
 
@@ -44,131 +39,35 @@ type KarpenterProfiler struct {
 
 // StartKarpenterProfiler begins profiling Karpenter resource usage in the background
 func StartKarpenterProfiler(env *Environment) *KarpenterProfiler {
-	ctx, cancel := context.WithCancel(env.Context)
-	kp := &KarpenterProfiler{
-		env:    env,
-		cancel: cancel,
-		done:   make(chan struct{}),
-	}
-	go kp.run(ctx)
-	return kp
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // Stop stops the profiler and returns peak memory (MB), memory profile, peak CPU (nanoseconds), and CPU profile
 func (kp *KarpenterProfiler) Stop() (float64, []byte, int64, []byte) {
-	kp.cancel()
-	<-kp.done
-	GinkgoWriter.Printf("KarpenterProfiler: Stopped after %d polls, peakMemory=%.2f MB, peakCPU=%.2f ms, lastError=%s\n", kp.pollCount, kp.peakMemoryMB, float64(kp.peakCPUNanos)/1e6, kp.lastError)
-	return kp.peakMemoryMB, kp.peakMemoryProfile, kp.peakCPUNanos, kp.peakCPUProfile
+	_ = "STUB: not implemented"
+	return 0, nil, 0, nil
 }
 
-func (kp *KarpenterProfiler) run(ctx context.Context) {
-	defer close(kp.done)
-	ticker := time.NewTicker(5 * time.Second)
-	defer ticker.Stop()
-
-	for {
-		kp.pollCount++
-		kp.captureProfiles(ctx)
-
-		select {
-		case <-ctx.Done():
-			return
-		case <-ticker.C:
-		}
-	}
-}
+func (kp *KarpenterProfiler) run(ctx context.Context) { _ = "STUB: not implemented"; return }
 
 func (kp *KarpenterProfiler) captureProfiles(ctx context.Context) {
-	defer GinkgoRecover()
-
-	pod := kp.env.ExpectActiveKarpenterPod()
-	if pod == nil {
-		return
-	}
-
-	portCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
-	defer cancel()
-
-	localPort := 1024
-	kp.env.ExpectPodPortForwarded(portCtx, pod, 8080, localPort)
-
-	// Capture heap profile (instant)
-	if memMB, memData := kp.fetchHeapProfile(localPort); memMB > kp.peakMemoryMB {
-		kp.peakMemoryMB = memMB
-		kp.peakMemoryProfile = memData
-	}
-
-	// Capture CPU profile (20 second sample)
-	if cpuNanos, cpuData := kp.fetchCPUProfile(localPort); cpuNanos > kp.peakCPUNanos {
-		kp.peakCPUNanos = cpuNanos
-		kp.peakCPUProfile = cpuData
-	}
+	_ = "STUB: not implemented"
+	return
 }
 
+// Capture heap profile (instant)
+
+// Capture CPU profile (20 second sample)
+
 func (kp *KarpenterProfiler) fetchHeapProfile(port int) (float64, []byte) {
-	resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/debug/pprof/heap", port))
-	if err != nil {
-		kp.lastError = fmt.Sprintf("pprof heap error: %v", err)
-		return 0, nil
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return 0, nil
-	}
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return 0, nil
-	}
-
-	memBytes := parseProfileValue(data, "inuse_space")
-	return float64(memBytes) / (1024 * 1024), data
+	_ = "STUB: not implemented"
+	return 0, nil
 }
 
 func (kp *KarpenterProfiler) fetchCPUProfile(port int) (int64, []byte) {
-	resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/debug/pprof/profile?seconds=%d", port, CPUProfileSeconds))
-	if err != nil {
-		return 0, nil
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return 0, nil
-	}
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return 0, nil
-	}
-
-	cpuNanos := parseProfileValue(data, "cpu")
-	return cpuNanos, data
+	_ = "STUB: not implemented"
+	return 0, nil
 }
 
-func parseProfileValue(data []byte, sampleType string) int64 {
-	p, err := profile.ParseData(data)
-	if err != nil {
-		return 0
-	}
-
-	var idx = -1
-	for i, st := range p.SampleType {
-		if st.Type == sampleType {
-			idx = i
-			break
-		}
-	}
-	if idx < 0 {
-		return 0
-	}
-
-	var total int64
-	for _, s := range p.Sample {
-		if idx < len(s.Value) {
-			total += s.Value[idx]
-		}
-	}
-	return total
-}
+func parseProfileValue(data []byte, sampleType string) int64 { _ = "STUB: not implemented"; return 0 }

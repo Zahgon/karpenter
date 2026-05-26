@@ -22,32 +22,17 @@ import (
 )
 
 func PodForDaemonSet(daemonSet *appsv1.DaemonSet) *corev1.Pod {
-	if daemonSet == nil {
-		return nil
-	}
-	pod := &corev1.Pod{Spec: daemonSet.Spec.Template.Spec}
-	// The API server performs defaulting to merge limits into requests for pods. However, this is not performed for higher
-	// level objects (e.g. deployments, daemonsets, etc). We should perform this defaulting ourselves when we create a fake
-	// pod for a daemonset.
-	for i := range pod.Spec.Containers {
-		mergeResourceLimitsIntoRequests(&pod.Spec.Containers[i])
-	}
-	for i := range pod.Spec.InitContainers {
-		mergeResourceLimitsIntoRequests(&pod.Spec.InitContainers[i])
-	}
-	return pod
+	_ = "STUB: not implemented"
+	return nil
 }
+
+// The API server performs defaulting to merge limits into requests for pods. However, this is not performed for higher
+// level objects (e.g. deployments, daemonsets, etc). We should perform this defaulting ourselves when we create a fake
+// pod for a daemonset.
 
 // mergeResourceLimitsIntoRequests merges resource limits into requests if no request exists for the given resource.
 // This is performed in place on the provided container.
 func mergeResourceLimitsIntoRequests(container *corev1.Container) {
-	if container.Resources.Requests == nil {
-		container.Resources.Requests = corev1.ResourceList{}
-	}
-	for resource, quantity := range container.Resources.Limits {
-		if _, ok := container.Resources.Requests[resource]; ok {
-			continue
-		}
-		container.Resources.Requests[resource] = quantity
-	}
+	_ = "STUB: not implemented"
+	return
 }

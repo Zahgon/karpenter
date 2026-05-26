@@ -17,10 +17,7 @@ limitations under the License.
 package test
 
 import (
-	"fmt"
-
 	"github.com/awslabs/operatorpkg/status"
-	"github.com/imdario/mergo"
 
 	"sigs.k8s.io/karpenter/pkg/test/v1alpha1"
 )
@@ -31,27 +28,11 @@ var (
 )
 
 // SetDefaultNodeClassType configures the default NodeClass type used when generating NodeClassRefs for test NodePools and NodeClaims.
-func SetDefaultNodeClassType(nc status.Object) {
-	defaultNodeClass = nc
-}
+func SetDefaultNodeClassType(nc status.Object) { _ = "STUB: not implemented"; return }
 
 // NodeClass creates a test NodeClass with defaults that can be overridden by overrides.
 // Overrides are applied in order, with a last write wins semantic.
 func NodeClass(overrides ...v1alpha1.TestNodeClass) *v1alpha1.TestNodeClass {
-	override := v1alpha1.TestNodeClass{}
-	for _, opts := range overrides {
-		if err := mergo.Merge(&override, opts, mergo.WithOverride); err != nil {
-			panic(fmt.Sprintf("failed to merge: %v", err))
-		}
-	}
-	if override.Name == "" {
-		override.Name = RandomName()
-	}
-	if override.Status.Conditions == nil {
-		override.StatusConditions().SetTrue(status.ConditionReady)
-	}
-	return &v1alpha1.TestNodeClass{
-		ObjectMeta: ObjectMeta(override.ObjectMeta),
-		Status:     override.Status,
-	}
+	_ = "STUB: not implemented"
+	return nil
 }

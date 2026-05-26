@@ -17,11 +17,7 @@ limitations under the License.
 package test
 
 import (
-	"fmt"
-
-	"github.com/imdario/mergo"
 	appsv1 "k8s.io/api/apps/v1"
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -35,27 +31,6 @@ type DaemonSetOptions struct {
 // DaemonSet creates a test pod with defaults that can be overridden by DaemonSetOptions.
 // Overrides are applied in order, with a last write wins semantic.
 func DaemonSet(overrides ...DaemonSetOptions) *appsv1.DaemonSet {
-	options := DaemonSetOptions{}
-	for _, opts := range overrides {
-		if err := mergo.Merge(&options, opts, mergo.WithOverride); err != nil {
-			panic(fmt.Sprintf("Failed to merge daemonset options: %s", err))
-		}
-	}
-	objectMeta := NamespacedObjectMeta(options.ObjectMeta)
-	if options.PodOptions.Labels == nil {
-		options.PodOptions.Labels = map[string]string{
-			"app": objectMeta.Name,
-		}
-	}
-	pod := Pod(options.PodOptions)
-	return &appsv1.DaemonSet{
-		ObjectMeta: objectMeta,
-		Spec: appsv1.DaemonSetSpec{
-			Selector: &metav1.LabelSelector{MatchLabels: options.PodOptions.Labels},
-			Template: v1.PodTemplateSpec{
-				ObjectMeta: pod.ObjectMeta,
-				Spec:       pod.Spec,
-			},
-		},
-	}
+	_ = "STUB: not implemented"
+	return nil
 }

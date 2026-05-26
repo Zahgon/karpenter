@@ -19,4 +19,4 @@ package v1
 import "context"
 
 // SetDefaults for the NodeClaim
-func (in *NodeClaim) SetDefaults(_ context.Context) {}
+func (in *NodeClaim) SetDefaults(_ context.Context) { _ = "STUB: not implemented"; return }

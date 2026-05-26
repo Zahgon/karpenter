@@ -18,7 +18,6 @@ package consistency
 
 import (
 	"context"
-	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -28,31 +27,12 @@ import (
 // NodeShape detects nodes that have launched with 10% or less of any resource than was expected.
 type NodeShape struct{}
 
-func NewNodeShape() Check {
-	return &NodeShape{}
-}
+func NewNodeShape() Check { _ = "STUB: not implemented"; return *new(Check) }
 
 func (n *NodeShape) Check(_ context.Context, node *corev1.Node, nodeClaim *v1.NodeClaim) ([]Issue, error) {
+	_ = "STUB: not implemented"
 	// ignore NodeClaims that are deleting
-	if !nodeClaim.DeletionTimestamp.IsZero() {
-		return nil, nil
-	}
-	// and NodeClaims that haven't initialized yet
-	if !nodeClaim.StatusConditions().Get(v1.ConditionTypeInitialized).IsTrue() {
-		return nil, nil
-	}
-	var issues []Issue
-	for resourceName, requested := range nodeClaim.Spec.Resources.Requests {
-		nodeQuantity := node.Status.Capacity[resourceName]
-		expectedQuantity := nodeClaim.Status.Capacity[resourceName]
-		if requested.IsZero() || expectedQuantity.IsZero() {
-			continue
-		}
-		pct := nodeQuantity.AsApproximateFloat64() / expectedQuantity.AsApproximateFloat64()
-		if pct < 0.90 {
-			issues = append(issues, Issue(fmt.Sprintf("expected %s of resource %s, but found %s (%0.1f%% of expected)", expectedQuantity.String(),
-				resourceName, nodeQuantity.String(), pct*100)))
-		}
-	}
-	return issues, nil
+	return nil, nil
 }
+
+// and NodeClaims that haven't initialized yet

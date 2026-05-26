@@ -18,13 +18,8 @@ package options
 
 import (
 	"context"
-	"errors"
-	"flag"
-	"fmt"
-	"os"
 
 	"sigs.k8s.io/karpenter/pkg/operator/options"
-	"sigs.k8s.io/karpenter/pkg/utils/env"
 )
 
 func init() {
@@ -38,32 +33,21 @@ type Options struct {
 	InstanceTypesFilePath string
 }
 
-func (o *Options) AddFlags(fs *options.FlagSet) {
-	fs.StringVar(&o.InstanceTypesFilePath, "instance-types-file-path", env.WithDefaultString("INSTANCE_TYPES_FILE_PATH", ""), "Path to a custom instance-types file")
-}
+func (o *Options) AddFlags(fs *options.FlagSet) { _ = "STUB: not implemented"; return }
 
 func (o *Options) Parse(fs *options.FlagSet, args ...string) error {
-	if err := fs.Parse(args); err != nil {
-		if errors.Is(err, flag.ErrHelp) {
-			os.Exit(0)
-		}
-		return fmt.Errorf("parsing flags, %w", err)
-	}
+	_ = "STUB: not implemented"
 	return nil
 }
 
 func (o *Options) ToContext(ctx context.Context) context.Context {
-	return ToContext(ctx, o)
+	_ = "STUB: not implemented"
+	return *new(context.Context)
 }
 
 func ToContext(ctx context.Context, opts *Options) context.Context {
-	return context.WithValue(ctx, optionsKey{}, opts)
+	_ = "STUB: not implemented"
+	return *new(context.Context)
 }
 
-func FromContext(ctx context.Context) *Options {
-	retval := ctx.Value(optionsKey{})
-	if retval == nil {
-		return nil
-	}
-	return retval.(*Options)
-}
+func FromContext(ctx context.Context) *Options { _ = "STUB: not implemented"; return nil }
